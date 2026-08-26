@@ -185,7 +185,7 @@
                         <div class="col-sm-6 col-xl">
                             <div class="card stat-card h-100 p-3">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div><p class="text-muted small mb-2">Total Barang</p><h3 class="fw-bold mb-0">0</h3></div>
+                                    <div><p class="text-muted small mb-2">Total Barang</p><h3 class="fw-bold mb-0">{{ $totalBarang }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-box-seam fs-5"></i></div>
                                 </div>
                                 <small class="text-muted mt-3"><i class="bi bi-dash"></i> Belum ada data</small>
@@ -194,7 +194,7 @@
                         <div class="col-sm-6 col-xl">
                             <div class="card stat-card h-100 p-3">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div><p class="text-muted small mb-2">Tersedia</p><h3 class="fw-bold mb-0">0</h3></div>
+                                    <div><p class="text-muted small mb-2">Tersedia</p><h3 class="fw-bold mb-0">{{ $barangTersedia }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-check-circle fs-5"></i></div>
                                 </div>
                                 <small class="text-success mt-3"><i class="bi bi-arrow-up"></i> Siap digunakan</small>
@@ -203,7 +203,7 @@
                         <div class="col-sm-6 col-xl" id="peminjaman">
                             <div class="card stat-card h-100 p-3">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div><p class="text-muted small mb-2">Dipinjam</p><h3 class="fw-bold mb-0">0</h3></div>
+                                    <div><p class="text-muted small mb-2">Dipinjam</p><h3 class="fw-bold mb-0">{{ $barangDipinjam }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-arrow-left-right fs-5"></i></div>
                                 </div>
                                 <small class="text-muted mt-3">Tidak ada peminjaman aktif</small>
@@ -212,7 +212,7 @@
                         <div class="col-sm-6 col-xl">
                             <div class="card stat-card h-100 p-3">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div><p class="text-muted small mb-2">Perlu Perbaikan</p><h3 class="fw-bold mb-0">0</h3></div>
+                                    <div><p class="text-muted small mb-2">Perlu Perbaikan</p><h3 class="fw-bold mb-0">{{ $barangRusak }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-tools fs-5"></i></div>
                                 </div>
                                 <small class="text-muted mt-3">Semua kondisi terpantau</small>
@@ -221,7 +221,7 @@
                         <div class="col-sm-6 col-xl" id="peminjaman-terlambat">
                             <div class="card stat-card h-100 p-3">
                                 <div class="d-flex justify-content-between align-items-start">
-                                    <div><p class="text-muted small mb-2">Peminjaman Terlambat</p><h3 class="fw-bold mb-0">0</h3></div>
+                                    <div><p class="text-muted small mb-2">Peminjaman Terlambat</p><h3 class="fw-bold mb-0">{{ $peminjamanTerlambat }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-exclamation-triangle-fill fs-5"></i></div>
                                 </div>
                                 <small class="text-danger mt-3"><i class="bi bi-arrow-up"></i> Perlu tindakan langsung</small>
@@ -237,10 +237,20 @@
                                         <div><h2 class="h5 fw-bold mb-1">Aset Terbaru</h2></div>
                                         <button class="btn btn-sm btn-outline-primary" type="button">Lihat semua</button>
                                     </div>
-                                    <div class="text-center py-5 text-muted">
-                                        <i class="bi bi-inbox display-5 d-block mb-3"></i>
-                                        <p class="mb-0">Belum ada aset yang ditambahkan.</p>
-                                    </div>
+                                    @forelse($barangTerbaru as $barang)
+                                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
+                                            <div>
+                                                <div class="fw-semibold">{{ $barang->nama_barang }}</div>
+                                                <small class="text-muted">{{ $barang->kode_barang }} · {{ $barang->lokasi->nama_lokasi }}</small>
+                                            </div>
+                                            <span class="badge bg-light text-dark">{{ ucfirst($barang->status) }}</span>
+                                        </div>
+                                    @empty
+                                        <div class="text-center py-5 text-muted">
+                                            <i class="bi bi-inbox display-5 d-block mb-3"></i>
+                                            <p class="mb-0">Belum ada aset yang ditambahkan.</p>
+                                        </div>
+                                    @endforelse
                                 </div>
                             </div>
                         </div>
