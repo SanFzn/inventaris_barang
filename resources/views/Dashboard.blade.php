@@ -23,13 +23,13 @@
 
         .sidebar {
             min-height: calc(100vh - 74px);
-            background: #172033;
+            background: var(--ink);
         }
 
         .brand-mark {
             width: 38px;
             height: 38px;
-            background: var(--blue);
+            background: var(--white);
         }
 
         .sidebar .nav-link {
@@ -78,6 +78,37 @@
         .text-muted { color: var(--muted) !important; }
         .avatar { width: 38px; height: 38px; background: #dce8ff; color: var(--blue); }
 
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .quick-action {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: .65rem;
+            color: var(--ink);
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: .5rem;
+            text-decoration: none;
+            transition: border-color .2s ease, color .2s ease, box-shadow .2s ease;
+        }
+
+        .quick-action:hover {
+            color: var(--blue);
+            border-color: var(--blue);
+            box-shadow: 0 6px 16px rgba(36, 107, 253, .12);
+        }
+
+        .quick-action i { font-size: 1.75rem; }
+
+        .brand-name { font-size: 1.1rem; }
+
         .navbar-left { flex: 1 1 auto; }
         .navbar-search { width: min(420px, 36vw); }
 
@@ -102,7 +133,8 @@
     <div class="container-fluid">
         <header class="topbar border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
             <div class="navbar-left d-flex align-items-center gap-4">
-                <h1 class="h5 mb-0 fw-bold">PT Cakrawala Global Yaksa</h1>
+                <i class="bi bi-box-seam fs-5"></i>
+                <h1 class="h5 mb-0 fw-bold">Inventaris Barang</h1>
                 <form method="GET" action="{{ route('dashboard') }}" class="navbar-search">
                     <div class="input-group input-group-sm">
                         <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
@@ -114,13 +146,15 @@
                 <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#scanQrModal">
                     <i class="bi bi-qr-code-scan me-1"></i> <span class="d-none d-lg-inline">Pindai QR</span>
                 </button>
-                <button class="btn btn-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#newAssetModal">
+                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#newAssetModal">
                     <i class="bi bi-plus-lg me-1"></i> <span class="d-none d-lg-inline">Aset Baru</span>
                 </button>
-                <button class="btn btn-light position-relative" type="button" aria-label="Notifikasi">
+                <a class="btn btn-light btn-sm bg-white position-relative" href="{{ route('notifications.index') }}" aria-label="Buka pusat notifikasi" title="Pusat notifikasi">
                     <i class="bi bi-bell"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle"></span>
-                </button>
+                    @if (session('notification_count', 0) > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" aria-label="Ada notifikasi baru"></span>
+                    @endif
+                </a>
                 <div class="avatar rounded-circle d-flex align-items-center justify-content-center fw-bold">
                     {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
                 </div>
@@ -128,10 +162,10 @@
                     <div class="small fw-bold">{{ Auth::user()->name }}</div>
                     <div class="small text-muted text-capitalize">{{ Auth::user()->role }}</div>
                 </div>
-                <form method="POST" action="{{ route('logout') }}" class="ms-2">
+                <form method="POST" action="{{ route('logout') }}" class="ms-2" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
                     @csrf
-                    <button class="btn btn-outline-secondary btn-sm" type="submit">
-                        <i class="bi bi-box-arrow-right me-1"></i> Keluar
+                    <button class="btn btn-outline-danger btn-sm" type="submit">
+                        <i class="bi bi-box-arrow-right me-1"></i> Logout
                     </button>
                 </form>
             </div>
@@ -141,11 +175,10 @@
             <aside class="col-md-3 col-lg-2 px-0 sidebar">
                 <div class="d-flex align-items-center gap-2 px-4 py-4 text-white">
                     <div class="brand-mark rounded-3 d-flex align-items-center justify-content-center">
-                        <i class="bi bi-box-seam fs-5"></i>
+                        <i class="bi bi-buildings fs-5"></i>
                     </div>
                     <div>
-                        <div class="fw-bold">Inventaris</div>
-                        <small class="text-white-50">Barang kantor</small>
+                        <div class="fw-bold brand-name">PT CGY</div>
                     </div>
                 </div>
 
@@ -153,14 +186,21 @@
                     <a class="nav-link active" href="{{ route('dashboard') }}">
                         <i class="bi bi-grid-1x2-fill me-2"></i> Dashboard
                     </a>
-                    <a class="nav-link" href="#kelola">
+                    <a class="nav-link" href="{{ route('assets.index') }}">
                         <i class="bi bi-boxes me-2"></i> Kelola Aset
                     </a>
-                    <a class="nav-link" href="#pindai">
+                    <a class="nav-link" href="#scanQrModal" data-bs-toggle="modal">
                         <i class="bi bi-qr-code-scan me-2"></i> Pindai dan Lacak QR
                     </a>
-                    <a class="nav-link" href="#persetujuan">
+                    <a class="nav-link" href="{{ route('approvals.index') }}">
                         <i class="bi bi-clipboard-check me-2"></i> Kelola Persetujuan
+                    </a>
+                    <a class="nav-link" href="{{ route('notifications.index') }}">
+                        <i class="bi bi-bell me-2"></i> Pusat Notifikasi
+                        <span class="badge rounded-pill bg-warning text-dark ms-auto">0</span>
+                    </a>
+                    <a class="nav-link" href="{{ route('qr.labels') }}">
+                        <i class="bi bi-printer me-2"></i> Cetak Label QR
                     </a>
                 </nav>
 
@@ -168,15 +208,12 @@
 
             <main class="col-md-9 col-lg-10 px-0">
                 <div class="p-4 p-lg-5">
-                    <section class="welcome-panel rounded-3 p-4 p-lg-5 mb-4">
+                    <section class="welcome-panel rounded-3 p-4 p-lg-4 mb-4">
                         <div class="row align-items-center">
                             <div class="col-lg-8">
                                 <p class="text-white-50 mb-2">Selamat datang kembali</p>
                                 <h2 class="fw-bold mb-2">Halo, {{ Auth::user()->name }}.</h2>
                                 <p class="mb-0 text-white-50">Pantau kondisi dan aktivitas inventaris dari satu tempat.</p>
-                            </div>
-                            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
-                                <i class="bi bi-clipboard-data display-1 opacity-25"></i>
                             </div>
                         </div>
                     </section>
@@ -249,7 +286,17 @@
                                 <div class="card-body p-4">
                                     <h2 class="h5 fw-bold mb-1">Aksi Cepat</h2>
                                     <p class="small text-muted mb-4">Akses cepat ke fitur utama</p>
+                                    <div class="quick-actions">
+                                        <a class="quick-action" href="#scanQrModal" data-bs-toggle="modal">
+                                            <i class="bi bi-qr-code-scan"></i>
+                                            <span class="small fw-semibold text-center">Pindai QR</span>
+                                        </a>
+                                        <a class="quick-action" href="{{ route('qr.labels') }}">
+                                            <i class="bi bi-printer"></i>
+                                            <span class="small fw-semibold text-center">Cetak Label QR</span>
+                                        </a>
                                     </div>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -266,12 +313,14 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
                 <div class="modal-body text-center py-5">
-                    <i class="bi bi-camera display-3 text-primary"></i>
-                    <p class="mt-3 mb-1 fw-semibold">Siap memindai kode QR aset</p>
-                    <p class="small text-muted mb-0">Arahkan kamera ke kode QR untuk melihat detail aset.</p>
+                    <div id="dashboard-qr-reader"></div>
+                    <div id="dashboard-scan-status" class="alert alert-secondary d-none mt-3" role="status"></div>
+                    <div id="dashboard-scan-result" class="alert alert-success d-none mt-3" role="alert"></div>
+                    <input type="file" id="dashboard-photo-input" accept="image/*" capture="environment" class="d-none">
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Mulai Pindai</button>
+                    <button type="button" class="btn btn-outline-primary" id="dashboard-photo-button"><i class="bi bi-image me-1"></i>Foto</button>
+                    <button type="button" class="btn btn-primary" id="dashboard-camera-button"><i class="bi bi-camera me-1"></i>Buka Kamera</button>
                 </div>
             </div>
         </div>
@@ -310,5 +359,75 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script>
+        const dashboardReader = new Html5Qrcode('dashboard-qr-reader');
+        const dashboardStatus = document.getElementById('dashboard-scan-status');
+        const dashboardResult = document.getElementById('dashboard-scan-result');
+        const dashboardCameraButton = document.getElementById('dashboard-camera-button');
+        const dashboardPhotoButton = document.getElementById('dashboard-photo-button');
+        const dashboardPhotoInput = document.getElementById('dashboard-photo-input');
+        let dashboardCameraRunning = false;
+
+        function setDashboardStatus(message, type = 'secondary') {
+            dashboardStatus.className = `alert alert-${type} mt-3`;
+            dashboardStatus.textContent = message;
+        }
+
+        function setDashboardResult(decodedText) {
+            dashboardResult.className = 'alert alert-success mt-3';
+            dashboardResult.innerHTML = '<strong>QR terbaca:</strong> <span></span>';
+            dashboardResult.querySelector('span').textContent = decodedText;
+        }
+
+        function handleDashboardScan(decodedText) {
+            if (dashboardCameraRunning) {
+                dashboardReader.stop().catch(() => {});
+                dashboardCameraRunning = false;
+                dashboardCameraButton.innerHTML = '<i class="bi bi-camera me-1"></i>Buka Kamera';
+            }
+            setDashboardResult(decodedText);
+            setDashboardStatus('Pemindaian selesai.', 'success');
+        }
+
+        dashboardCameraButton.addEventListener('click', async () => {
+            if (dashboardCameraRunning) return;
+            setDashboardStatus('Meminta izin kamera...', 'info');
+            try {
+                await dashboardReader.start(
+                    { facingMode: 'environment' },
+                    { fps: 10, qrbox: { width: 220, height: 220 } },
+                    handleDashboardScan,
+                    () => {}
+                );
+                dashboardCameraRunning = true;
+                dashboardCameraButton.innerHTML = '<i class="bi bi-camera-fill me-1"></i>Kamera Aktif';
+                setDashboardStatus('Arahkan kamera ke kode QR.', 'info');
+            } catch (error) {
+                setDashboardStatus('Kamera tidak dapat dibuka. Gunakan Foto atau periksa izin browser.', 'danger');
+            }
+        });
+
+        dashboardPhotoButton.addEventListener('click', () => dashboardPhotoInput.click());
+        dashboardPhotoInput.addEventListener('change', async (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            setDashboardStatus('Membaca QR dari foto...', 'info');
+            try {
+                setDashboardResult(await dashboardReader.scanFile(file, true));
+                setDashboardStatus('Pemindaian selesai.', 'success');
+            } catch (error) {
+                setDashboardStatus('Kode QR tidak ditemukan pada foto.', 'warning');
+            }
+            dashboardPhotoInput.value = '';
+        });
+
+        document.getElementById('scanQrModal').addEventListener('hidden.bs.modal', () => {
+            if (dashboardCameraRunning) {
+                dashboardReader.stop().catch(() => {});
+                dashboardCameraRunning = false;
+            }
+        });
+    </script>
 </body>
 </html>
