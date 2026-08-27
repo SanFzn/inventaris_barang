@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Models\Kategori;
+use App\Models\Lokasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -24,7 +26,16 @@ class BarangController extends Controller
             $query->where('status', $request->input('status'));
         }
 
-        return response()->json($query->paginate(15));
+        $barangs = $query->paginate(15);
+        if ($request->expectsJson()) {
+            return response()->json($barangs);
+        }
+
+        return view('assets.index', [
+            'barangs' => $barangs,
+            'kategoris' => Kategori::orderBy('nama_kategori')->get(),
+            'lokasis' => Lokasi::orderBy('nama_lokasi')->get(),
+        ]);
     }
 
     public function store(Request $request)
@@ -44,7 +55,12 @@ class BarangController extends Controller
             $data['file_qr'] = $request->file('file_qr')->store('qr', 'public');
         }
 
-        return response()->json(Barang::create($data)->load(['kategori', 'lokasi']), 201);
+        $barang = Barang::create($data)->load(['kategori', 'lokasi']);
+        if (!$request->expectsJson()) {
+            return redirect()->route('assets.index')->with('success', 'Aset berhasil ditambahkan.');
+        }
+
+        return response()->json($barang, 201);
     }
 
     public function show(Barang $barang)
@@ -73,6 +89,10 @@ class BarangController extends Controller
         }
 
         $barang->update($data);
+        if (!$request->expectsJson()) {
+            return redirect()->route('assets.index')->with('success', 'Aset berhasil diperbarui.');
+        }
+
         return response()->json($barang->load(['kategori', 'lokasi']));
     }
 
@@ -86,6 +106,10 @@ class BarangController extends Controller
             Storage::disk('public')->delete($barang->file_qr);
         }
         $barang->delete();
+        if (!request()->expectsJson()) {
+            return redirect()->route('assets.index')->with('success', 'Aset berhasil dihapus.');
+        }
+
         return response()->json(['message' => 'Barang berhasil dihapus.']);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Barang;
+use App\Models\Kategori;
+use App\Models\Lokasi;
 use App\Models\Peminjaman;
 use Illuminate\Http\Request;
 
@@ -27,6 +29,8 @@ class DashboardController extends Controller
             'peminjamanTerlambat' => Peminjaman::where('status_pinjam', 'dipinjam')
                 ->whereNotNull('tgl_kembali')->where('tgl_kembali', '<', now())->count(),
             'barangTerbaru' => $query->take(5)->get(),
+            'kategoris' => Kategori::orderBy('nama_kategori')->get(),
+            'lokasis' => Lokasi::orderBy('nama_lokasi')->get(),
         ]);
     }
 }

@@ -146,9 +146,11 @@
                 <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#scanQrModal">
                     <i class="bi bi-qr-code-scan me-1"></i> <span class="d-none d-lg-inline">Pindai QR</span>
                 </button>
-                <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#newAssetModal">
-                    <i class="bi bi-plus-lg me-1"></i> <span class="d-none d-lg-inline">Aset Baru</span>
-                </button>
+                @if (Auth::user()->role === 'admin')
+                    <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#newAssetModal">
+                        <i class="bi bi-plus-lg me-1"></i> <span class="d-none d-lg-inline">Aset Baru</span>
+                    </button>
+                @endif
                 <a class="btn btn-light btn-sm bg-white position-relative" href="{{ route('notifications.index') }}" aria-label="Buka pusat notifikasi" title="Pusat notifikasi">
                     <i class="bi bi-bell"></i>
                     @if (session('notification_count', 0) > 0)
@@ -272,7 +274,7 @@
                                 <div class="card-body p-4">
                                     <div class="d-flex justify-content-between align-items-center mb-4">
                                         <div><h2 class="h5 fw-bold mb-1">Aset Terbaru</h2></div>
-                                        <button class="btn btn-sm btn-outline-primary" type="button">Lihat semua</button>
+                                        <a class="btn btn-sm btn-outline-primary" href="{{ route('assets.index') }}">Lihat semua</a>
                                     </div>
                                     @forelse($barangTerbaru as $barang)
                                         <div class="d-flex justify-content-between align-items-center border-bottom py-3">
@@ -343,7 +345,7 @@
                     <h2 class="modal-title h5 fw-bold" id="newAssetModalLabel"><i class="bi bi-box-seam me-2 text-primary"></i>Tambah Aset Baru</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
-                <form action="#" method="POST">
+                <form action="{{ route('assets.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
@@ -353,6 +355,35 @@
                         <div class="mb-3">
                             <label for="assetCode" class="form-label">Kode Aset</label>
                             <input type="text" class="form-control" id="assetCode" name="kode_barang" placeholder="Contoh: AST-001">
+                        </div>
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="assetCategory" class="form-label">Kategori</label>
+                                <select class="form-select" id="assetCategory" name="id_kategori" required>
+                                    <option value="">Pilih kategori</option>
+                                    @foreach ($kategoris as $kategori)
+                                        <option value="{{ $kategori->id_kategori }}">{{ $kategori->nama_kategori }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="assetLocation" class="form-label">Lokasi</label>
+                                <select class="form-select" id="assetLocation" name="id_lokasi" required>
+                                    <option value="">Pilih lokasi</option>
+                                    @foreach ($lokasis as $lokasi)
+                                        <option value="{{ $lokasi->id_lokasi }}">{{ $lokasi->nama_lokasi }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="assetStatus" class="form-label">Status</label>
+                            <select class="form-select" id="assetStatus" name="status" required>
+                                <option value="tersedia">Tersedia</option>
+                                <option value="dipinjam">Dipinjam</option>
+                                <option value="rusak">Rusak</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
                         </div>
                         <div>
                             <label for="assetDescription" class="form-label">Deskripsi</label>
