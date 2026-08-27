@@ -13,7 +13,7 @@ class CreateUsersTable extends Migration
             $table->charset = 'utf8mb4';
             $table->collation = 'utf8mb4_general_ci';
             $table->increments('id_user');
-            $table->string('nama_lengkap', 100);
+            $table->string('username', 100);
             $table->string('email', 100);
             $table->string('password', 255);
             $table->enum('role', ['admin', 'karyawan']);

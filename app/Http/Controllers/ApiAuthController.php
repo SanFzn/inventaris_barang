@@ -40,13 +40,13 @@ class ApiAuthController extends Controller
     public function register(Request $request)
     {
         $data = $request->validate([
-            'nama_lengkap' => 'required|string|max:100',
+            'username' => 'required|string|max:100',
             'email' => 'required|email|max:100|unique:users,email',
             'password' => 'required|string|min:6|confirmed',
         ]);
 
         $user = User::create([
-            'nama_lengkap' => $data['nama_lengkap'],
+            'username' => $data['username'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
             'role' => 'karyawan',

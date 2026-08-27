@@ -24,11 +24,11 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $request->validate([
-            'nama_lengkap' => 'required|string',
+            'username' => 'required|string',
             'password' => 'required|min:6',
         ]);
 
-        $user = User::where('nama_lengkap', $request->nama_lengkap)->first();
+        $user = User::where('username', $request->username)->first();
 
         if ($user && $this->passwordMatches($request->password, $user->password)) {
             if (!$this->isHashedPassword($user->password)) {
@@ -42,7 +42,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'nama_lengkap' => 'Nama lengkap atau password salah.',
+            'username' => 'Username atau password salah.',
         ]);
     }
 
@@ -55,7 +55,7 @@ class AuthController extends Controller
         ]);
 
         $user = User::create([
-            'nama_lengkap' => $validated['name'],
+            'username' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'karyawan',
