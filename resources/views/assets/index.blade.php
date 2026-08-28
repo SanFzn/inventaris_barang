@@ -6,6 +6,19 @@
     <title>Kelola Aset | Inventaris Barang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .delete-modal-icon {
+            width: 64px;
+            height: 64px;
+            display: grid;
+            place-items: center;
+            margin: 0 auto 1rem;
+            border-radius: 50%;
+            color: #dc3545;
+            background: #fff0f1;
+            font-size: 1.75rem;
+        }
+    </style>
 </head>
 <body class="bg-light">
     <main class="container py-4 py-lg-5">
@@ -54,7 +67,7 @@
                                         <td><span class="badge bg-success">{{ ucfirst($barang->status) }}</span></td>
                                         <td>
                                             <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editAsset{{ $barang->id_barang }}"><i class="bi bi-pencil"></i></button>
-                                            <form method="POST" action="{{ route('assets.destroy', $barang) }}" class="d-inline" onsubmit="return confirm('Hapus aset ini?')">
+                                            <form method="POST" action="{{ route('assets.destroy', $barang) }}" class="d-inline delete-asset-form" data-asset-name="{{ $barang->nama_barang }}">
                                                 @csrf @method('DELETE')
                                                 <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
                                             </form>
@@ -84,7 +97,6 @@
                             <div class="col-md-6"><label for="id_kategori" class="form-label">Kategori</label><select id="id_kategori" name="id_kategori" class="form-select" required><option value="">Pilih kategori</option>@foreach ($kategoris as $kategori)<option value="{{ $kategori->id_kategori }}" @selected(old('id_kategori') == $kategori->id_kategori)>{{ $kategori->nama_kategori }}</option>@endforeach</select></div>
                             <div class="col-md-6"><label for="id_lokasi" class="form-label">Lokasi</label><select id="id_lokasi" name="id_lokasi" class="form-select" required><option value="">Pilih lokasi</option>@foreach ($lokasis as $lokasi)<option value="{{ $lokasi->id_lokasi }}" @selected(old('id_lokasi') == $lokasi->id_lokasi)>{{ $lokasi->nama_lokasi }}</option>@endforeach</select></div>
                             <div class="col-md-6"><label for="tgl_pembelian" class="form-label">Tanggal pembelian</label><input id="tgl_pembelian" name="tgl_pembelian" type="date" class="form-control" value="{{ old('tgl_pembelian') }}"></div>
-                            <div class="col-md-6"><label for="status" class="form-label">Status</label><select id="status" name="status" class="form-select" required><option value="tersedia">Tersedia</option><option value="dipinjam">Dipinjam</option><option value="rusak">Rusak</option><option value="maintenance">Maintenance</option></select></div>
                             <div class="col-12"><label for="spesifikasi" class="form-label">Spesifikasi</label><textarea id="spesifikasi" name="spesifikasi" class="form-control" rows="3">{{ old('spesifikasi') }}</textarea></div>
                         </div>
                     </div>
@@ -120,6 +132,43 @@
             </div>
         </div>
     @endforeach
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-body text-center p-4">
+                    <div class="delete-modal-icon"><i class="bi bi-trash3"></i></div>
+                    <h2 class="h5 fw-bold mb-2" id="deleteConfirmModalLabel">Hapus aset?</h2>
+                    <p class="text-muted mb-4">Aset <strong id="deleteAssetName"></strong> akan dihapus secara permanen.</p>
+                    <div class="d-flex gap-2 justify-content-center">
+                        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
+                        <button type="button" class="btn btn-danger px-4" id="confirmDeleteButton"><i class="bi bi-trash3 me-1"></i>Hapus</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const deleteModalElement = document.getElementById('deleteConfirmModal');
+        const deleteModal = new bootstrap.Modal(deleteModalElement);
+        const deleteAssetName = document.getElementById('deleteAssetName');
+        const confirmDeleteButton = document.getElementById('confirmDeleteButton');
+        let pendingDeleteForm;
+
+        document.querySelectorAll('.delete-asset-form').forEach((form) => {
+            form.addEventListener('submit', (event) => {
+                event.preventDefault();
+                pendingDeleteForm = form;
+                deleteAssetName.textContent = form.dataset.assetName;
+                deleteModal.show();
+            });
+        });
+
+        confirmDeleteButton.addEventListener('click', () => {
+            if (pendingDeleteForm) {
+                pendingDeleteForm.submit();
+            }
+        });
+    </script>
 </body>
 </html>
