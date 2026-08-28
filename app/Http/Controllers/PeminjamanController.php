@@ -6,7 +6,7 @@ use App\Models\Barang;
 use App\Models\Peminjaman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+5
 class PeminjamanController extends Controller
 {
     public function index(Request $request)
@@ -41,7 +41,12 @@ class PeminjamanController extends Controller
         $data['tgl_pinjam'] = $data['tgl_pinjam'] ?? now();
         $data['status_pinjam'] = 'menunggu';
 
-        return response()->json(Peminjaman::create($data)->load(['user', 'barang']), 201);
+        $peminjaman = Peminjaman::create($data)->load(['user', 'barang']);
+        if (!$request->expectsJson()) {
+            return redirect()->route('dashboard')->with('success', 'Pengajuan peminjaman berhasil dikirim.');
+        }
+
+        return response()->json($peminjaman, 201);
     }
 
     public function show(Peminjaman $peminjaman)

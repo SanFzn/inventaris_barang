@@ -17,6 +17,12 @@
 
             <main class="col-md-9 col-lg-10 px-0">
                 <div class="p-4 p-lg-5">
+                    @if (session('success'))
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            {{ session('success') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                        </div>
+                    @endif
                     <section class="welcome-panel rounded-3 p-4 p-lg-4 mb-4">
                         <div class="row align-items-center">
                             <div class="col-lg-8">
@@ -106,6 +112,12 @@
                                     <h2 class="h5 fw-bold mb-1">Aksi Cepat</h2>
                                     <p class="small text-muted mb-4">Akses cepat ke fitur utama</p>
                                     <div class="quick-actions">
+                                        @if (Auth::user()->role === 'admin')
+                                            <a class="quick-action" href="#newAssetModal" data-bs-toggle="modal">
+                                                <i class="bi bi-plus-circle"></i>
+                                                <span class="small fw-semibold text-center">Tambah Aset</span>
+                                            </a>
+                                        @endif
                                         <a class="quick-action" href="#scanQrModal" data-bs-toggle="modal">
                                             <i class="bi bi-qr-code-scan"></i>
                                             <span class="small fw-semibold text-center">Pindai QR</span>
@@ -121,6 +133,45 @@
                     </section>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <div class="modal fade" id="borrowAssetModal" tabindex="-1" aria-labelledby="borrowAssetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="borrowAssetModalLabel"><i class="bi bi-box-arrow-up-right me-2 text-primary"></i>Pinjam Barang</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <form method="POST" action="{{ route('loans.store') }}">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="borrowAsset" class="form-label">Barang</label>
+                            <select id="borrowAsset" name="id_barang" class="form-select" required>
+                                <option value="">Pilih barang tersedia</option>
+                                @forelse ($barangUntukDipinjam as $barang)
+                                    <option value="{{ $barang->id_barang }}">{{ $barang->kode_barang }} - {{ $barang->nama_barang }}</option>
+                                @empty
+                                    <option value="" disabled>Tidak ada barang tersedia</option>
+                                @endforelse
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="borrowReturnDate" class="form-label">Rencana tanggal kembali</label>
+                            <input id="borrowReturnDate" name="tgl_kembali" type="datetime-local" class="form-control">
+                        </div>
+                        <div>
+                            <label for="borrowNote" class="form-label">Keterangan</label>
+                            <textarea id="borrowNote" name="keterangan" class="form-control" rows="3" placeholder="Keperluan peminjaman"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary" @disabled($barangUntukDipinjam->isEmpty())><i class="bi bi-send me-1"></i>Kirim Pengajuan</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -182,15 +233,6 @@
                                     @endforeach
                                 </select>
                             </div>
-                        </div>
-                        <div class="mb-3">
-                            <label for="assetStatus" class="form-label">Status</label>
-                            <select class="form-select" id="assetStatus" name="status" required>
-                                <option value="tersedia">Tersedia</option>
-                                <option value="dipinjam">Dipinjam</option>
-                                <option value="rusak">Rusak</option>
-                                <option value="maintenance">Maintenance</option>
-                            </select>
                         </div>
                         <div>
                             <label for="assetDescription" class="form-label">Deskripsi</label>
