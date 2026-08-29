@@ -28,7 +28,7 @@ class DatabaseSeeder extends Seeder
         User::updateOrCreate(
             ['email' => 'admin@inventaris.local'],
             [
-                'nama_lengkap' => 'admin',
+                'username' => 'admin',
                 'password' => Hash::make('admin123'),
                 'role' => 'admin',
             ]

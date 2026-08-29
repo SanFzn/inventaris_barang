@@ -86,7 +86,7 @@ CREATE TABLE `peminjaman` (
 
 CREATE TABLE `users` (
   `id_user` int(11) NOT NULL,
-  `nama_lengkap` varchar(100) NOT NULL,
+  `username` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `role` enum('admin','karyawan') NOT NULL
@@ -96,7 +96,7 @@ CREATE TABLE `users` (
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id_user`, `nama_lengkap`, `email`, `password`, `role`) VALUES
+INSERT INTO `users` (`id_user`, `username`, `email`, `password`, `role`) VALUES
 (1, 'Aditya Maulana', 'adityamaulana55086@gmail.com', 'kukuk123', 'admin');
 
 --

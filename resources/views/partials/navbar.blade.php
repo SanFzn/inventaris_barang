@@ -31,7 +31,7 @@
             <div class="small fw-bold">{{ Auth::user()->name }}</div>
             <div class="small text-muted text-capitalize">{{ Auth::user()->role }}</div>
         </div>
-        <form method="POST" action="{{ route('logout') }}" class="ms-2" onsubmit="return confirm('Apakah Anda yakin ingin logout?');">
+        <form method="POST" action="{{ route('logout') }}" class="ms-2 logout-form">
             @csrf
             <button class="btn btn-outline-danger btn-sm" type="submit">
                 <i class="bi bi-box-arrow-right me-1"></i> Logout
@@ -39,3 +39,38 @@
         </form>
     </div>
 </header>
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-body text-center p-4">
+                <div class="rounded-circle bg-light text-danger d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; font-size: 1.75rem;">
+                    <i class="bi bi-box-arrow-right"></i>
+                </div>
+                <h2 class="h5 fw-bold mb-2" id="logoutConfirmModalLabel">Keluar dari aplikasi?</h2>
+                <p class="text-muted mb-4">Sesi Anda akan diakhiri dan Anda perlu login kembali untuk masuk.</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-danger px-4" id="confirmLogoutButton"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const logoutForm = document.querySelector('.logout-form');
+        const logoutModalElement = document.getElementById('logoutConfirmModal');
+        const confirmLogoutButton = document.getElementById('confirmLogoutButton');
+
+        if (!logoutForm || !logoutModalElement || !confirmLogoutButton) {
+            return;
+        }
+
+        const logoutModal = new bootstrap.Modal(logoutModalElement);
+        logoutForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            logoutModal.show();
+        });
+        confirmLogoutButton.addEventListener('click', () => logoutForm.submit());
+    });
+</script>

@@ -47,9 +47,10 @@ class BarangController extends Controller
             'id_lokasi' => 'required|exists:lokasi,id_lokasi',
             'spesifikasi' => 'nullable|string',
             'tgl_pembelian' => 'nullable|date',
-            'status' => 'sometimes|in:tersedia,dipinjam,rusak,maintenance',
+            'status' => 'required|in:tersedia,dipinjam,rusak,maintenance',
             'file_qr' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
         ]);
+        $data['status'] = 'tersedia';
 
         if ($request->hasFile('file_qr')) {
             $data['file_qr'] = $request->file('file_qr')->store('qr', 'public');
