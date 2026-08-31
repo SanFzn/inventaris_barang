@@ -94,10 +94,9 @@
                         <div class="row g-3">
                             <div class="col-md-6"><label for="kode_barang" class="form-label">Kode aset</label><input id="kode_barang" name="kode_barang" class="form-control" value="{{ old('kode_barang') }}" required></div>
                             <div class="col-md-6"><label for="nama_barang" class="form-label">Nama aset</label><input id="nama_barang" name="nama_barang" class="form-control" value="{{ old('nama_barang') }}" required></div>
-                            <div class="col-md-6"><label for="id_kategori" class="form-label">Kategori</label><select id="id_kategori" name="id_kategori" class="form-select" required><option value="">Pilih kategori</option>@foreach ($kategoris as $kategori)<option value="{{ $kategori->id_kategori }}" @selected(old('id_kategori') == $kategori->id_kategori)>{{ $kategori->nama_kategori }}</option>@endforeach</select></div>
-                            <div class="col-md-6"><label for="id_lokasi" class="form-label">Lokasi</label><select id="id_lokasi" name="id_lokasi" class="form-select" required><option value="">Pilih lokasi</option>@foreach ($lokasis as $lokasi)<option value="{{ $lokasi->id_lokasi }}" @selected(old('id_lokasi') == $lokasi->id_lokasi)>{{ $lokasi->nama_lokasi }}</option>@endforeach</select></div>
-                            <div class="col-md-6"><label for="tgl_pembelian" class="form-label">Tanggal pembelian</label><input id="tgl_pembelian" name="tgl_pembelian" type="date" class="form-control" value="{{ old('tgl_pembelian') }}"></div>
-                            <div class="col-md-6"><label for="status" class="form-label">Status</label><select id="status" name="status" class="form-select" required><option value="tersedia">Tersedia</option><option value="dipinjam">Dipinjam</option><option value="rusak">Rusak</option><option value="maintenance">Maintenance</option></select></div>
+                            <div class="col-md-6"><label for="id_kategori" class="form-label">Kategori</label><select id="id_kategori" name="id_kategori" class="form-select" required><option value="">Pilih kategori</option>@foreach ($kategoris as $kategori)<option value="{{ $kategori->id_kategori }}" {{ old('id_kategori') == $kategori->id_kategori ? 'selected' : '' }}>{{ $kategori->nama_kategori }}</option>@endforeach</select></div>
+                            <div class="col-md-6"><label for="id_lokasi" class="form-label">Lokasi</label><select id="id_lokasi" name="id_lokasi" class="form-select" required><option value="">Pilih lokasi</option>@foreach ($lokasis as $lokasi)<option value="{{ $lokasi->id_lokasi }}" {{ old('id_lokasi') == $lokasi->id_lokasi ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>@endforeach</select></div>
+                            <div class="col-md-12"><label for="tgl_pembelian" class="form-label">Tanggal pembelian</label><input id="tgl_pembelian" name="tgl_pembelian" type="date" class="form-control" value="{{ old('tgl_pembelian') }}"></div>
                             <div class="col-12"><label for="spesifikasi" class="form-label">Spesifikasi</label><textarea id="spesifikasi" name="spesifikasi" class="form-control" rows="3">{{ old('spesifikasi') }}</textarea></div>
                         </div>
                     </div>
@@ -130,14 +129,10 @@
                                     <input name="nama_barang" class="form-control" value="{{ $barang->nama_barang }}" required>
                                 </div>
                                 <div class="col-md-6">
-                                    <label class="form-label">Nama aset</label>
-                                    <input name="nama_barang" class="form-control" value="{{ $barang->nama_barang }}" required>
-                                </div>
-                                <div class="col-md-6">
                                     <label class="form-label">Kategori</label>
                                     <select name="id_kategori" class="form-select" required>
                                         @foreach ($kategoris as $kategori)
-                                            <option value="{{ $kategori->id_kategori }}" @selected($barang->id_kategori == $kategori->id_kategori)>{{ $kategori->nama_kategori }}</option>
+                                            <option value="{{ $kategori->id_kategori }}" {{ $barang->id_kategori == $kategori->id_kategori ? 'selected' : '' }}>{{ $kategori->nama_kategori }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -145,21 +140,13 @@
                                     <label class="form-label">Lokasi</label>
                                     <select name="id_lokasi" class="form-select" required>
                                         @foreach ($lokasis as $lokasi)
-                                            <option value="{{ $lokasi->id_lokasi }}" @selected($barang->id_lokasi == $lokasi->id_lokasi)>{{ $lokasi->nama_lokasi }}</option>
+                                            <option value="{{ $lokasi->id_lokasi }}" {{ $barang->id_lokasi == $lokasi->id_lokasi ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <label class="form-label">Tanggal pembelian</label>
                                     <input name="tgl_pembelian" type="date" class="form-control" value="{{ optional($barang->tgl_pembelian)->format('Y-m-d') }}">
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Status</label>
-                                    <select name="status" class="form-select" required>
-                                        @foreach (['tersedia', 'dipinjam', 'rusak', 'maintenance'] as $status)
-                                            <option value="{{ $status }}" @selected($barang->status === $status)>{{ ucfirst($status) }}</option>
-                                        @endforeach
-                                    </select>
                                 </div>
                                 <div class="col-12"><label class="form-label">Spesifikasi</label><textarea name="spesifikasi" class="form-control" rows="3">{{ $barang->spesifikasi }}</textarea></div>
                             </div>

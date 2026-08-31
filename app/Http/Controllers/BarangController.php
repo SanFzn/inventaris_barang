@@ -47,7 +47,6 @@ class BarangController extends Controller
             'id_lokasi' => 'required|exists:lokasi,id_lokasi',
             'spesifikasi' => 'nullable|string',
             'tgl_pembelian' => 'nullable|date',
-            'status' => 'required|in:tersedia,dipinjam,rusak,maintenance',
             'file_qr' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
         ]);
         $data['status'] = 'tersedia';
@@ -55,8 +54,6 @@ class BarangController extends Controller
         if ($request->hasFile('file_qr')) {
             $data['file_qr'] = $request->file('file_qr')->store('qr', 'public');
         }
-
-        $data['status'] = $data['status'] ?? 'tersedia';
 
         $barang = Barang::create($data)->load(['kategori', 'lokasi']);
         if (!$request->expectsJson()) {
@@ -80,7 +77,6 @@ class BarangController extends Controller
             'id_lokasi' => 'required|exists:lokasi,id_lokasi',
             'spesifikasi' => 'nullable|string',
             'tgl_pembelian' => 'nullable|date',
-            'status' => 'required|in:tersedia,dipinjam,rusak,maintenance',
             'file_qr' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
         ]);
 
