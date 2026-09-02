@@ -47,7 +47,6 @@
                     <i class="bi bi-box-arrow-right"></i>
                 </div>
                 <h2 class="h5 fw-bold mb-2" id="logoutConfirmModalLabel">Keluar dari aplikasi?</h2>
-                <p class="text-muted mb-4">Sesi Anda akan diakhiri dan Anda perlu login kembali untuk masuk.</p>
                 <div class="d-flex gap-2 justify-content-center">
                     <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
                     <button type="button" class="btn btn-danger px-4" id="confirmLogoutButton"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
