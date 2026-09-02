@@ -16,7 +16,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
+
+Route::view('/cetak-label-qr', 'qr.labels')->name('qr.labels');
+Route::get('/qr/generate/{kodeBarang}', [BarangController::class, 'generateQrImage'])->name('qr.generate');
 
 // Protected Routes - Hanya bisa diakses setelah login
 Route::middleware(['auth'])->group(function () {
@@ -29,7 +31,6 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/aset/{barang}', [BarangController::class, 'destroy'])->name('assets.destroy');
     });
     Route::view('/pindai-qr', 'qr.index')->name('qr.index');
-        Route::view('/notifikasi', 'notifications.index')->name('notifications.index');
-        Route::view('/cetak-label-qr', 'qr.labels')->name('qr.labels');
+    Route::view('/notifikasi', 'notifications.index')->name('notifications.index');
     Route::view('/persetujuan', 'approvals.index')->name('approvals.index');
 });

@@ -7,12 +7,31 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
-        .label-preview { max-width: 340px; border: 1px dashed #adb5bd; }
+        .label-preview {
+            max-width: 340px;
+            border: 1px dashed #adb5bd;
+            transition: all 0.2s ease;
+        }
+
+        .label-preview.photo-mode {
+            max-width: 460px;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid #dfe7f5;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+        }
+
         #qr-code img { margin: auto; }
+
         @media print {
             body { background: #fff !important; }
             .no-print { display: none !important; }
             .label-preview { border: 0; box-shadow: none !important; }
+            .label-preview.photo-mode {
+                max-width: 100%;
+                border: 0;
+                padding: 0;
+            }
         }
     </style>
 </head>
@@ -32,45 +51,99 @@
                         <h2 class="h5 fw-bold mb-3">Detail aset</h2>
                         <div class="mb-3">
                             <label for="asset-name" class="form-label">Nama aset</label>
-                            <input id="asset-name" class="form-control" value="">
+                            <input id="asset-name" class="form-control" value="{{ request('nama_barang', 'Nama Aset') }}">
                         </div>
                         <div class="mb-3">
                             <label for="asset-code" class="form-label">Kode aset</label>
-                            <input id="asset-code" class="form-control" value="">
+                            <input id="asset-code" class="form-control" value="{{ request('kode_barang', 'BRG-001') }}">
                         </div>
-                        <button type="button" class="btn btn-primary w-100" onclick="window.print()">
-                            <i class="bi bi-printer me-1"></i>Cetak label
-                        </button>
+                        <div class="d-grid gap-2">
+                            <button type="button" id="downloadPngBtn" class="btn btn-success w-100">
+                                <i class="bi bi-download me-1"></i>Download file foto QR
+                            </button>
+                            <button type="button" id="printPdfBtn" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-file-earmark-pdf me-1"></i>Simpan / cetak PDF
+                            </button>
+                            <button type="button" class="btn btn-primary w-100 print-mode-button" data-mode="physical" onclick="setPrintMode('physical'); setTimeout(() => window.print(), 150);">
+                                <i class="bi bi-printer me-1"></i>Cetak bentuk fisik
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary w-100 print-mode-button" data-mode="foto" onclick="setPrintMode('foto'); document.getElementById('label-preview-area').scrollIntoView({ behavior: 'smooth', block: 'center' });">
+                                <i class="bi bi-file-earmark-image me-1"></i>Lihat bentuk foto di web
+                            </button>
+                        </div>
                     </div>
                 </div>
             </section>
-            <section class="col-lg-7">
-                <div class="label-preview bg-white shadow-sm rounded-3 mx-auto p-4 text-center">
+            <section class="col-lg-7" id="label-preview-area">
+                <div id="labelPreview" class="label-preview bg-white shadow-sm rounded-3 mx-auto p-4 text-center {{ request('mode') === 'foto' ? 'photo-mode' : '' }}">
                     <div class="text-uppercase text-muted small fw-bold">Inventaris Barang</div>
                     <h2 id="preview-name" class="h5 fw-bold mt-2 mb-1"></h2>
-                    <div id="qr-code" class="my-3"></div>
+                    <div id="qr-code" class="my-3 d-flex justify-content-center align-items-center" style="min-height: 180px;"></div>
                     <div id="preview-code" class="fw-bold"></div>
                 </div>
             </section>
         </div>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <script>
         const nameInput = document.getElementById('asset-name');
         const codeInput = document.getElementById('asset-code');
         const previewName = document.getElementById('preview-name');
         const previewCode = document.getElementById('preview-code');
         const qrCode = document.getElementById('qr-code');
+        const labelPreview = document.getElementById('labelPreview');
+        const downloadPngBtn = document.getElementById('downloadPngBtn');
+        const printPdfBtn = document.getElementById('printPdfBtn');
+
+        function getQrImageUrl(code, size) {
+            return 'https://api.qrserver.com/v1/create-qr-code/?size=' + size + 'x' + size + '&data=' + encodeURIComponent(code);
+        }
+
+        function setPrintMode(mode) {
+            const isPhotoMode = mode === 'foto';
+            labelPreview.classList.toggle('photo-mode', isPhotoMode);
+            const url = new URL(window.location.href);
+            url.searchParams.set('mode', mode);
+            window.history.replaceState({}, '', url);
+        }
 
         function renderLabel() {
-            const name = nameInput.value.trim();
-            const code = codeInput.value.trim();
+            const name = nameInput.value.trim() || 'Nama aset';
+            const code = codeInput.value.trim() || 'BRG-001';
             previewName.textContent = name;
             previewCode.textContent = code;
-            qrCode.replaceChildren();
-            if (code) {
-                new QRCode(qrCode, { text: code, width: 160, height: 160 });
-            }
+            qrCode.innerHTML = '';
+
+            const img = document.createElement('img');
+            const qrSize = labelPreview.classList.contains('photo-mode') ? 200 : 160;
+            const qrUrl = '/qr/generate/' + encodeURIComponent(code) + '?size=' + qrSize;
+            img.src = qrUrl;
+            img.alt = 'QR Code ' + code;
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            img.style.display = 'block';
+            qrCode.appendChild(img);
+            return qrUrl;
+        }
+
+        downloadPngBtn.addEventListener('click', () => {
+            const code = codeInput.value.trim() || 'BRG-001';
+            const fileName = (code || 'qr-code').replace(/[^a-z0-9-_]+/gi, '-').toLowerCase();
+            const link = document.createElement('a');
+            link.href = '/qr/generate/' + encodeURIComponent(code) + '?size=1000';
+            link.download = fileName + '.png';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        });
+
+        printPdfBtn.addEventListener('click', () => {
+            setPrintMode('foto');
+            setTimeout(() => window.print(), 150);
+        });
+
+        const initialMode = new URLSearchParams(window.location.search).get('mode') || 'physical';
+        if (initialMode === 'foto') {
+            labelPreview.classList.add('photo-mode');
         }
 
         nameInput.addEventListener('input', renderLabel);

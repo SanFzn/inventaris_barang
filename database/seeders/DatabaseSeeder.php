@@ -25,6 +25,24 @@ class DatabaseSeeder extends Seeder
             Lokasi::firstOrCreate(['nama_lokasi' => $namaLokasi]);
         }
 
+        foreach (['Laptop', 'Meja', 'Kursi', 'Printer', 'Monitor', 'Komputer', 'Tablet'] as $namaBarang) {
+            $kategori = Kategori::inRandomOrder()->first();
+            $lokasi = Lokasi::inRandomOrder()->first();
+
+            \App\Models\Barang::firstOrCreate(
+                ['nama_barang' => $namaBarang],
+                [
+                    'kode_barang' => 'BRG-' . strtoupper(substr($namaBarang, 0, 4)) . '-' . rand(100, 999),
+                    'id_kategori' => $kategori->id_kategori,
+                    'id_lokasi' => $lokasi->id_lokasi,
+                    'spesifikasi' => 'Spesifikasi untuk ' . $namaBarang,
+                    'tgl_pembelian' => now(),
+                    'status' => 'tersedia',
+                    'file_qr' => null,
+                ]
+            );
+        }
+
         User::updateOrCreate(
             ['email' => 'admin@inventaris.local'],
             [
