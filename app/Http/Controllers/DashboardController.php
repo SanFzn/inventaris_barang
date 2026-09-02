@@ -29,6 +29,7 @@ class DashboardController extends Controller
             'peminjamanTerlambat' => Peminjaman::where('status_pinjam', 'dipinjam')
                 ->whereNotNull('tgl_kembali')->where('tgl_kembali', '<', now())->count(),
             'barangTerbaru' => $query->take(5)->get(),
+            'barangUntukDipinjam' => Barang::where('status', 'tersedia')->orderBy('nama_barang')->get(),
             'kategoris' => Kategori::orderBy('nama_kategori')->get(),
             'lokasis' => Lokasi::orderBy('nama_lokasi')->get(),
         ]);

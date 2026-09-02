@@ -77,7 +77,6 @@ class BarangController extends Controller
             'id_lokasi' => 'required|exists:lokasi,id_lokasi',
             'spesifikasi' => 'nullable|string',
             'tgl_pembelian' => 'nullable|date',
-            'status' => 'required|in:tersedia,dipinjam,rusak,maintenance',
             'file_qr' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
         ]);
 

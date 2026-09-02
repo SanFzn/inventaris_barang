@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PeminjamanController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -21,6 +22,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/aset', [BarangController::class, 'index'])->name('assets.index');
+    Route::post('/peminjaman', [PeminjamanController::class, 'store'])->name('loans.store');
     Route::middleware('admin')->group(function () {
         Route::post('/aset', [BarangController::class, 'store'])->name('assets.store');
         Route::put('/aset/{barang}', [BarangController::class, 'update'])->name('assets.update');
