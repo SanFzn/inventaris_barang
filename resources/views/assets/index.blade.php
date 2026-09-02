@@ -122,7 +122,7 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label class="form-label">Kode aset</label>
-                                    <input name="kode_barang" class="form-control" value="{{ $barang->kode_barang }}" required>
+                                    <input name="kode_barang" class="form-control" value="{{ $barang->kode_barang }}" readonly required>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label">Nama aset</label>
