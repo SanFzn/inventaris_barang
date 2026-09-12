@@ -6,6 +6,30 @@
     <title>Kelola Aset | Inventaris Barang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="{{ asset('css/assets.css') }}" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <main class="container py-4 py-lg-5">
+    @include('assets.partials.header')
+    @include('assets.partials.flash-messages')
+    @include('assets.partials.table')
+    </main>
+
+    @include('assets.partials.create-modal')
+    @include('assets.partials.edit-modals')
+    @include('assets.partials.delete-modal')
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ asset('js/assets.js') }}"></script>
+</body>
+</html>
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kelola Aset | Inventaris Barang</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
     <style>
         .delete-modal-icon {
             width: 64px;

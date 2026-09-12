@@ -1,0 +1,11 @@
+.delete-modal-icon {
+    width: 64px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 1rem;
+    border-radius: 50%;
+    color: #dc3545;
+    background: #fff0f1;
+    font-size: 1.75rem;
+}
