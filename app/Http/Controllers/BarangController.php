@@ -47,6 +47,7 @@ class BarangController extends Controller
     public function store(StoreBarangRequest $request)
     {
         $data = $request->validated();
+        $data['kode_barang'] = $this->generateAssetCode($data['nama_barang']);
         $data['status'] = 'tersedia';
 
         if ($request->hasFile('file_qr')) {
@@ -69,6 +70,17 @@ class BarangController extends Controller
         }
 
         return response()->json($barang, 201);
+    }
+
+    private function generateAssetCode(string $assetName): string
+    {
+        $prefix = strtoupper(substr($assetName, 0, 4));
+
+        do {
+            $code = 'BRG-' . $prefix . '-' . random_int(100, 999);
+        } while (Barang::where('kode_barang', $code)->exists());
+
+        return $code;
     }
 
     public function show(Barang $barang)

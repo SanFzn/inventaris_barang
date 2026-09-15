@@ -14,7 +14,7 @@ class StoreBarangRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kode_barang' => 'required|string|max:50|unique:barang,kode_barang',
+            'kode_barang' => 'nullable|string|max:50',
             'nama_barang' => 'required|string|max:100',
             'id_kategori' => 'required|exists:kategori,id_kategori',
             'id_lokasi' => 'required|exists:lokasi,id_lokasi',

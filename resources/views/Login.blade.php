@@ -51,7 +51,12 @@
                     </div>
                     <div class="mb-4">
                         <label for="password" class="form-label">Password</label>
-                        <input id="password" type="password" name="password" class="form-control" required>
+                        <div class="input-group">
+                            <input id="password" type="password" name="password" class="form-control" required>
+                            <button type="button" class="btn btn-outline-secondary" id="togglePassword" aria-label="Tampilkan password" aria-pressed="false">
+                                <i class="bi bi-eye" aria-hidden="true"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Masuk</button>
                 </form>
@@ -59,5 +64,20 @@
         </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const passwordInput = document.getElementById('password');
+        const togglePasswordButton = document.getElementById('togglePassword');
+
+        togglePasswordButton.addEventListener('click', () => {
+            const isPasswordVisible = passwordInput.type === 'text';
+            passwordInput.type = isPasswordVisible ? 'password' : 'text';
+            togglePasswordButton.setAttribute('aria-pressed', String(!isPasswordVisible));
+            togglePasswordButton.setAttribute(
+                'aria-label',
+                isPasswordVisible ? 'Tampilkan password' : 'Sembunyikan password'
+            );
+            togglePasswordButton.querySelector('i').className = isPasswordVisible ? 'bi bi-eye' : 'bi bi-eye-slash';
+        });
+    </script>
 </body>
 </html>
