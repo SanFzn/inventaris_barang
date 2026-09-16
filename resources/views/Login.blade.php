@@ -6,26 +6,7 @@
     <title>Login | Inventaris Barang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <style>
-        .logout-toast {
-            position: fixed;
-            right: 1.5rem;
-            bottom: 1.5rem;
-            z-index: 1080;
-            max-width: min(380px, calc(100vw - 2rem));
-            border-left: 4px solid #198754;
-            animation: toast-in .3s ease-out;
-        }
-
-        @keyframes toast-in {
-            from { opacity: 0; transform: translateY(1rem); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 575.98px) {
-            .logout-toast { right: 1rem; bottom: 1rem; left: 1rem; max-width: none; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
 </head>
 <body class="bg-light">
     @if(session('success'))
@@ -51,7 +32,12 @@
                     </div>
                     <div class="mb-4">
                         <label for="password" class="form-label">Password</label>
-                        <input id="password" type="password" name="password" class="form-control" required>
+                        <div class="input-group">
+                            <input id="password" type="password" name="password" class="form-control" required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Tampilkan password">
+                                <i class="bi bi-eye-slash" id="toggleIcon"></i>
+                            </button>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Masuk</button>
                 </form>
@@ -59,5 +45,20 @@
         </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const passwordInput = document.getElementById('password');
+            const toggleButton = document.getElementById('togglePassword');
+            const toggleIcon = document.getElementById('toggleIcon');
+
+            toggleButton.addEventListener('click', function () {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                toggleIcon.classList.toggle('bi-eye', isPassword);
+                toggleIcon.classList.toggle('bi-eye-slash', !isPassword);
+                toggleButton.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
+            });
+        });
+    </script>
 </body>
 </html>

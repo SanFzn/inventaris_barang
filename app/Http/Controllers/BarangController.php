@@ -39,6 +39,23 @@ class BarangController extends Controller
         ]);
     }
 
+    public function labels(Request $request)
+    {
+        $query = Barang::orderBy('nama_barang')->orderBy('kode_barang');
+
+        if ($request->filled('q')) {
+            $search = $request->input('q');
+            $query->where(function ($builder) use ($search) {
+                $builder->where('nama_barang', 'like', "%{$search}%")
+                    ->orWhere('kode_barang', 'like', "%{$search}%");
+            });
+        }
+
+        $barangs = $query->get();
+
+        return view('qr.labels', compact('barangs'));
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -64,7 +81,6 @@ class BarangController extends Controller
                 return redirect()->route('qr.labels', [
                     'nama_barang' => $barang->nama_barang,
                     'kode_barang' => $barang->kode_barang,
-                    'mode' => 'foto',
                 ])->with('success', 'Aset berhasil ditambahkan.');
             }
 
@@ -113,7 +129,10 @@ class BarangController extends Controller
         }
 
         if ($barang->file_qr) {
-            Storage::disk('public')->delete($barang->file_qr);
+            $filePath = public_path($barang->file_qr);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
         }
         $barang->delete();
         if (!request()->expectsJson()) {

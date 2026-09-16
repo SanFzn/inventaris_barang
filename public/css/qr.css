@@ -1,0 +1,132 @@
+/* ==========================================================================
+   QR Code Module Styles (Scanner & Label Printing)
+   ========================================================================== */
+
+/* Scanner Styles (/qr/pindai) */
+#qr-reader { 
+    max-width: 420px; 
+    margin: 0 auto; 
+    overflow: hidden;
+    border-radius: .5rem;
+}
+
+#qr-reader video,
+#qr-reader img,
+#qr-reader canvas { 
+    width: 100% !important; 
+    height: auto !important; 
+    max-height: 280px !important;
+    object-fit: contain !important;
+    border-radius: .5rem;
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
+#scan-result { 
+    max-width: 360px; 
+    margin: 1rem auto 0; 
+    font-size: .875rem; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+}
+
+.qr-result-image {
+    width: 90px;
+    height: 90px;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    display: block;
+    margin: 0.5rem auto;
+    padding: 4px;
+    border: 1px solid #dee2e6;
+    border-radius: .375rem;
+    background: #fff;
+}
+
+#scan-result strong { 
+    margin-top: 0.5rem; 
+}
+
+#photoResultModal .modal-dialog {
+    max-width: 320px;
+}
+
+#modal-qr {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+#modal-qr img { 
+    width: 100px; 
+    height: 100px; 
+    object-fit: contain;
+    border: 1px solid #dee2e6;
+    border-radius: .375rem;
+    background: #fff;
+    padding: 4px;
+}
+
+/* Label Printing Styles (/qr/labels) */
+.labels-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.label-preview {
+    min-height: 300px;
+    border: 1px dashed #adb5bd;
+    break-inside: avoid;
+}
+
+.label-preview img {
+    width: 130px;
+    max-width: 100%;
+    height: auto;
+}
+
+.label-selector {
+    text-align: left;
+}
+
+@media print {
+    body { 
+        background: #fff !important; 
+    }
+    .no-print, header, aside, .sidebar, .topbar { 
+        display: none !important; 
+    }
+    .container-fluid {
+        height: auto !important;
+        display: block !important;
+    }
+    .container-fluid > .row {
+        display: block !important;
+    }
+    main {
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        overflow: visible !important;
+    }
+    .labels-grid { 
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 0.5rem; 
+    }
+    .label-preview:not(.selected-for-print) { 
+        display: none !important; 
+    }
+    .label-preview { 
+        min-height: 0; 
+        border: 1px dashed #adb5bd; 
+        box-shadow: none !important; 
+    }
+    .label-preview img { 
+        width: 70px; 
+    }
+}
+

@@ -5,85 +5,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Kelola Aset | Inventaris Barang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .delete-modal-icon {
-            width: 64px;
-            height: 64px;
-            display: grid;
-            place-items: center;
-            margin: 0 auto 1rem;
-            border-radius: 50%;
-            color: #dc3545;
-            background: #fff0f1;
-            font-size: 1.75rem;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/assets.css') }}">
 </head>
-<body class="bg-light">
-    <main class="container py-4 py-lg-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <a href="{{ route('dashboard') }}" class="text-decoration-none">&larr; Dashboard</a>
-                <h1 class="h3 fw-bold mt-3 mb-1">Kelola Aset</h1>
-                <p class="text-muted mb-0">Daftar dan kondisi aset inventaris.</p>
-            </div>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssetModal">
-                <i class="bi bi-plus-lg me-1"></i>Tambah Aset
-            </button>
-        </div>
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-0">
-                @if ($barangs->isEmpty())
-                    <div class="text-center py-5">
-                        <h2 class="h5">Belum ada aset</h2>
-                        <p class="text-muted mb-0">Data aset akan tampil di halaman ini setelah ditambahkan.</p>
+<body class="container-fluid">
+    @include('partials.navbar')
+
+    <div class="row">
+        @include('partials.sidebar')
+
+        <main class="col-md-9 col-lg-10 px-0">
+            <div class="p-4 p-lg-5">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h1 class="h3 fw-bold mt-3 mb-1">Kelola Aset</h1>
+                        <p class="text-muted mb-0">Daftar dan kondisi aset inventaris.</p>
                     </div>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead>
-                                <tr><th class="px-4">Kode</th><th>Nama Aset</th><th>Kategori</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($barangs as $barang)
-                                    <tr>
-                                        <td class="px-4 fw-semibold">{{ $barang->kode_barang }}</td>
-                                        <td>{{ $barang->nama_barang }}</td>
-                                        <td>{{ $barang->kategori->nama_kategori ?? '-' }}</td>
-                                        <td>{{ $barang->lokasi->nama_lokasi ?? '-' }}</td>
-                                        <td><span class="badge bg-success">{{ ucfirst($barang->status) }}</span></td>
-                                        <td>
-                                            <div class="d-flex gap-2">
-                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editAsset{{ $barang->id_barang }}"><i class="bi bi-pencil"></i></button>
-                                                <a href="{{ route('qr.labels', ['nama_barang' => $barang->nama_barang, 'kode_barang' => $barang->kode_barang]) }}" class="btn btn-sm btn-outline-secondary" title="Cetak label QR"><i class="bi bi-printer"></i></a>
-                                                <form method="POST" action="{{ route('assets.destroy', $barang) }}" class="d-inline delete-asset-form" data-asset-name="{{ $barang->nama_barang }}">
-                                                    @csrf @method('DELETE')
-                                                    <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+                        <i class="bi bi-plus-lg me-1"></i>Tambah Aset
+                    </button>
+                </div>
+                @if (session('success'))
+                    <div class="alert alert-success">{{ session('success') }}</div>
+                @endif
+                @if ($errors->any())
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
                     </div>
                 @endif
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-0">
+                        @if ($barangs->isEmpty())
+                            <div class="text-center py-5">
+                                <h2 class="h5">Belum ada aset</h2>
+                                <p class="text-muted mb-0">Data aset akan tampil di halaman ini setelah ditambahkan.</p>
+                            </div>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead>
+                                        <tr><th class="px-4">Kode</th><th>Nama Aset</th><th>Kategori</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($barangs as $barang)
+                                            <tr>
+                                                <td class="px-4 fw-semibold">{{ $barang->kode_barang }}</td>
+                                                <td>{{ $barang->nama_barang }}</td>
+                                                <td>{{ $barang->kategori->nama_kategori ?? '-' }}</td>
+                                                <td>{{ $barang->lokasi->nama_lokasi ?? '-' }}</td>
+                                                <td><span class="badge bg-success">{{ ucfirst($barang->status) }}</span></td>
+                                                <td>
+                                                    <div class="d-flex gap-2">
+                                                        <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editAsset{{ $barang->id_barang }}"><i class="bi bi-pencil"></i></button>
+                                                        <a href="{{ route('qr.labels', ['nama_barang' => $barang->nama_barang, 'kode_barang' => $barang->kode_barang]) }}" class="btn btn-sm btn-outline-secondary" title="Cetak label QR"><i class="bi bi-printer"></i></a>
+                                                        <form method="POST" action="{{ route('assets.destroy', $barang) }}" class="d-inline delete-asset-form" data-asset-name="{{ $barang->nama_barang }}">
+                                                            @csrf @method('DELETE')
+                                                            <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
+                                                        </form>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </div>
             </div>
-        </div>
-    </main>
+        </main>
+    </div>
     <div class="modal fade" id="addAssetModal" tabindex="-1" aria-labelledby="addAssetModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -176,27 +172,9 @@
         </div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        const deleteModalElement = document.getElementById('deleteConfirmModal');
-        const deleteModal = new bootstrap.Modal(deleteModalElement);
-        const deleteAssetName = document.getElementById('deleteAssetName');
-        const confirmDeleteButton = document.getElementById('confirmDeleteButton');
-        let pendingDeleteForm;
-
-        document.querySelectorAll('.delete-asset-form').forEach((form) => {
-            form.addEventListener('submit', (event) => {
-                event.preventDefault();
-                pendingDeleteForm = form;
-                deleteAssetName.textContent = form.dataset.assetName;
-                deleteModal.show();
-            });
-        });
-
-        confirmDeleteButton.addEventListener('click', () => {
-            if (pendingDeleteForm) {
-                pendingDeleteForm.submit();
-            }
-        });
-    </script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="{{ asset('js/navbar.js') }}"></script>
+    <script src="{{ asset('js/assets.js') }}"></script>
+    <script src="{{ asset('js/dashboard.js') }}"></script>
 </body>
 </html>

@@ -8,8 +8,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
 </head>
-<body>
-    <div class="container-fluid">
+<body class="container-fluid">
         @include('partials.navbar')
 
         <div class="row">
@@ -134,7 +133,6 @@
                 </div>
             </main>
         </div>
-    </div>
 
     <div class="modal fade" id="borrowAssetModal" tabindex="-1" aria-labelledby="borrowAssetModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -175,14 +173,14 @@
         </div>
     </div>
 
-    <div class="modal fade" id="scanQrModal" tabindex="-1" aria-labelledby="scanQrModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="scanQrModal" tabindex="-1" aria-labelledby="scanQrModalLabel" aria-hidden="true" data-generate-url="{{ route('qr.generate', ':code') }}">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
                     <h2 class="modal-title h5 fw-bold" id="scanQrModalLabel"><i class="bi bi-qr-code-scan me-2 text-primary"></i>Pindai dan Lacak QR</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
-                <div class="modal-body text-center py-5">
+                <div class="modal-body text-center p-4">
                     <div id="dashboard-qr-reader"></div>
                     <div id="dashboard-scan-status" class="alert alert-secondary d-none mt-3" role="status"></div>
                     <div id="dashboard-scan-result" class="alert alert-success d-none mt-3" role="alert"></div>
@@ -250,74 +248,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <script>
-        const dashboardReader = new Html5Qrcode('dashboard-qr-reader');
-        const dashboardStatus = document.getElementById('dashboard-scan-status');
-        const dashboardResult = document.getElementById('dashboard-scan-result');
-        const dashboardCameraButton = document.getElementById('dashboard-camera-button');
-        const dashboardPhotoButton = document.getElementById('dashboard-photo-button');
-        const dashboardPhotoInput = document.getElementById('dashboard-photo-input');
-        let dashboardCameraRunning = false;
-
-        function setDashboardStatus(message, type = 'secondary') {
-            dashboardStatus.className = `alert alert-${type} mt-3`;
-            dashboardStatus.textContent = message;
-        }
-
-        function setDashboardResult(decodedText) {
-            dashboardResult.className = 'alert alert-success mt-3';
-            dashboardResult.innerHTML = '<strong>QR terbaca:</strong> <span></span>';
-            dashboardResult.querySelector('span').textContent = decodedText;
-        }
-
-        function handleDashboardScan(decodedText) {
-            if (dashboardCameraRunning) {
-                dashboardReader.stop().catch(() => {});
-                dashboardCameraRunning = false;
-                dashboardCameraButton.innerHTML = '<i class="bi bi-camera me-1"></i>Buka Kamera';
-            }
-            setDashboardResult(decodedText);
-            setDashboardStatus('Pemindaian selesai.', 'success');
-        }
-
-        dashboardCameraButton.addEventListener('click', async () => {
-            if (dashboardCameraRunning) return;
-            setDashboardStatus('Meminta izin kamera...', 'info');
-            try {
-                await dashboardReader.start(
-                    { facingMode: 'environment' },
-                    { fps: 10, qrbox: { width: 220, height: 220 } },
-                    handleDashboardScan,
-                    () => {}
-                );
-                dashboardCameraRunning = true;
-                dashboardCameraButton.innerHTML = '<i class="bi bi-camera-fill me-1"></i>Kamera Aktif';
-                setDashboardStatus('Arahkan kamera ke kode QR.', 'info');
-            } catch (error) {
-                setDashboardStatus('Kamera tidak dapat dibuka. Gunakan Foto atau periksa izin browser.', 'danger');
-            }
-        });
-
-        dashboardPhotoButton.addEventListener('click', () => dashboardPhotoInput.click());
-        dashboardPhotoInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            setDashboardStatus('Membaca QR dari foto...', 'info');
-            try {
-                setDashboardResult(await dashboardReader.scanFile(file, true));
-                setDashboardStatus('Pemindaian selesai.', 'success');
-            } catch (error) {
-                setDashboardStatus('Kode QR tidak ditemukan pada foto.', 'warning');
-            }
-            dashboardPhotoInput.value = '';
-        });
-
-        document.getElementById('scanQrModal').addEventListener('hidden.bs.modal', () => {
-            if (dashboardCameraRunning) {
-                dashboardReader.stop().catch(() => {});
-                dashboardCameraRunning = false;
-            }
-        });
-    </script>
+    <script src="{{ asset('js/navbar.js') }}"></script>
+    <script src="{{ asset('js/dashboard.js') }}"></script>
 </body>
 </html>

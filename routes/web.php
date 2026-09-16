@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PeminjamanController;
+use App\Http\Controllers\QrController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -12,17 +13,26 @@ Route::get('/', function () {
 
 // Auth Routes
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/login', [AuthController::class, 'login']);            
 Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::view('/cetak-label-qr', 'qr.labels')->name('qr.labels');
-Route::get('/qr/generate/{kodeBarang}', [BarangController::class, 'generateQrImage'])->name('qr.generate');
+// QR Routes (Public)
+Route::prefix('qr')->name('qr.')->group(function () {
+    Route::get('/generate/{code}', [QrController::class, 'generate'])->where('code', '.*')->name('generate');
+});
 
 // Protected Routes - Hanya bisa diakses setelah login
 Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    
+    // QR Routes (Protected)
+    Route::prefix('qr')->name('qr.')->group(function () {
+        Route::view('/pindai', 'qr.index')->name('index');
+        Route::get('/labels', [BarangController::class, 'labels'])->name('labels');
+    });
+    
     Route::get('/aset', [BarangController::class, 'index'])->name('assets.index');
     Route::post('/peminjaman', [PeminjamanController::class, 'store'])->name('loans.store');
     Route::middleware('admin')->group(function () {
@@ -30,7 +40,6 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/aset/{barang}', [BarangController::class, 'update'])->name('assets.update');
         Route::delete('/aset/{barang}', [BarangController::class, 'destroy'])->name('assets.destroy');
     });
-    Route::view('/pindai-qr', 'qr.index')->name('qr.index');
     Route::view('/notifikasi', 'notifications.index')->name('notifications.index');
     Route::view('/persetujuan', 'approvals.index')->name('approvals.index');
 });

@@ -6,7 +6,7 @@ use App\Models\Barang;
 use App\Models\Peminjaman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-5
+
 class PeminjamanController extends Controller
 {
     public function index(Request $request)

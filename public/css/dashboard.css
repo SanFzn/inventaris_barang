@@ -34,6 +34,18 @@ main {
     min-height: 0;
     background: var(--ink);
     overflow-y: auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-logout {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    background: var(--ink);
+    z-index: 10;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.2);
 }
 
 .brand-mark {
@@ -147,6 +159,12 @@ main {
     .sidebar { min-height: auto; }
     .sidebar .nav { flex-direction: row !important; overflow-x: auto; flex-wrap: nowrap; }
     .sidebar .nav-link { white-space: nowrap; }
+    .sidebar-logout {
+        position: static;
+        box-shadow: none;
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+    }
 }
 
 @media (max-width: 1199.98px) {
@@ -165,4 +183,29 @@ main {
     .navbar-left {
         width: 100%;
     }
+}
+
+#dashboard-qr-reader {
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+    overflow: hidden;
+    border-radius: 0.5rem;
+}
+
+#dashboard-qr-reader video,
+#dashboard-qr-reader img,
+#dashboard-qr-reader canvas {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 260px !important;
+    object-fit: cover !important;
+    border-radius: 0.5rem;
+}
+
+#dashboard-scan-result {
+    max-width: 360px;
+    margin: 0.75rem auto 0;
+    font-size: 0.875rem;
+    word-break: break-all;
 }

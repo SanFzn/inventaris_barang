@@ -21,7 +21,7 @@ class DashboardController extends Controller
             });
         }
 
-        return view('Dashboard', [
+        return view('dashboard', [
             'totalBarang' => Barang::count(),
             'barangTersedia' => Barang::where('status', 'tersedia')->count(),
             'barangDipinjam' => Barang::where('status', 'dipinjam')->count(),
