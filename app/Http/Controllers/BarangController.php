@@ -2,15 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreBarangRequest;
+use App\Http\Requests\UpdateBarangRequest;
 use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\Lokasi;
+use App\Services\QrCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
 
 class BarangController extends Controller
 {
+    public function __construct(private QrCodeService $qrCodeService)
+    {
+    }
+
     public function index(Request $request)
     {
         $query = Barang::with(['kategori', 'lokasi'])->latest('id_barang');
@@ -56,17 +62,10 @@ class BarangController extends Controller
         return view('qr.labels', compact('barangs'));
     }
 
-    public function store(Request $request)
+    public function store(StoreBarangRequest $request)
     {
-        $data = $request->validate([
-            'kode_barang' => 'required|string|max:50|unique:barang,kode_barang',
-            'nama_barang' => 'required|string|max:100',
-            'id_kategori' => 'required|exists:kategori,id_kategori',
-            'id_lokasi' => 'required|exists:lokasi,id_lokasi',
-            'spesifikasi' => 'nullable|string',
-            'tgl_pembelian' => 'nullable|date',
-            'file_qr' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
-        ]);
+        $data = $request->validated();
+        $data['kode_barang'] = $this->generateAssetCode($data['nama_barang']);
         $data['status'] = 'tersedia';
 
         if ($request->hasFile('file_qr')) {
@@ -74,7 +73,7 @@ class BarangController extends Controller
         }
 
         $barang = Barang::create($data)->load(['kategori', 'lokasi']);
-        $this->generateQrFile($barang);
+        $this->qrCodeService->generateFor($barang);
 
         if (!$request->expectsJson()) {
             if ($request->boolean('create_photo_label')) {
@@ -90,22 +89,25 @@ class BarangController extends Controller
         return response()->json($barang, 201);
     }
 
+    private function generateAssetCode(string $assetName): string
+    {
+        $prefix = strtoupper(substr($assetName, 0, 4));
+
+        do {
+            $code = 'BRG-' . $prefix . '-' . random_int(100, 999);
+        } while (Barang::where('kode_barang', $code)->exists());
+
+        return $code;
+    }
+
     public function show(Barang $barang)
     {
         return response()->json($barang->load(['kategori', 'lokasi', 'peminjaman.user']));
     }
 
-    public function update(Request $request, Barang $barang)
+    public function update(UpdateBarangRequest $request, Barang $barang)
     {
-        $data = $request->validate([
-            'kode_barang' => 'required|string|max:50|unique:barang,kode_barang,' . $barang->id_barang . ',id_barang',
-            'nama_barang' => 'required|string|max:100',
-            'id_kategori' => 'required|exists:kategori,id_kategori',
-            'id_lokasi' => 'required|exists:lokasi,id_lokasi',
-            'spesifikasi' => 'nullable|string',
-            'tgl_pembelian' => 'nullable|date',
-            'file_qr' => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf|max:2048',
-        ]);
+        $data = $request->validated();
 
         if ($request->hasFile('file_qr')) {
             if ($barang->file_qr) {
@@ -142,54 +144,22 @@ class BarangController extends Controller
         return response()->json(['message' => 'Barang berhasil dihapus.']);
     }
 
-    private function generateQrFile(Barang $barang): void
-    {
-        $kode = trim((string) $barang->kode_barang);
-        if ($kode === '') {
-            return;
-        }
-
-        $fileName = Str::slug($kode) . '-' . md5($kode) . '.png';
-        $publicDir = public_path('qr');
-        if (!is_dir($publicDir)) {
-            mkdir($publicDir, 0777, true);
-        }
-
-        $filePath = $publicDir . DIRECTORY_SEPARATOR . $fileName;
-        if (!file_exists($filePath)) {
-            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=' . urlencode($kode);
-            $imageContents = @file_get_contents($qrUrl);
-            if ($imageContents !== false) {
-                file_put_contents($filePath, $imageContents);
-            }
-        }
-
-        $barang->file_qr = 'qr/' . $fileName;
-        $barang->save();
-    }
-
     public function generateQrImage($kodeBarang)
     {
         $kode = rawurldecode($kodeBarang);
         $barang = Barang::where('kode_barang', $kode)->first();
 
         if ($barang) {
-            $this->generateQrFile($barang);
+            $this->qrCodeService->generateFor($barang);
             $filePath = public_path($barang->file_qr);
             if (file_exists($filePath)) {
                 return response()->file($filePath, ['Content-Type' => 'image/png']);
             }
         }
 
-        $fileName = Str::slug($kode ?: 'qr-code') . '-' . md5($kode ?: 'qr-code') . '.png';
-        $filePath = public_path('qr/' . $fileName);
+        $filePath = $this->qrCodeService->pathFor($kode);
         if (!file_exists($filePath)) {
-            $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=' . urlencode($kode);
-            $imageContents = @file_get_contents($qrUrl);
-            if ($imageContents === false) {
-                return response()->json(['message' => 'Gagal membuat file QR.'], 500);
-            }
-            file_put_contents($filePath, $imageContents);
+            return response()->json(['message' => 'Gagal membuat file QR.'], 500);
         }
 
         return response()->file($filePath, ['Content-Type' => 'image/png']);

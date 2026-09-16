@@ -34,8 +34,8 @@
                         <label for="password" class="form-label">Password</label>
                         <div class="input-group">
                             <input id="password" type="password" name="password" class="form-control" required>
-                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Tampilkan password">
-                                <i class="bi bi-eye-slash" id="toggleIcon"></i>
+                            <button type="button" class="btn btn-outline-secondary" id="togglePassword" aria-label="Tampilkan password" aria-pressed="false">
+                                <i class="bi bi-eye" id="toggleIcon" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
@@ -48,15 +48,22 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const passwordInput = document.getElementById('password');
-            const toggleButton = document.getElementById('togglePassword');
+            const togglePasswordButton = document.getElementById('togglePassword');
             const toggleIcon = document.getElementById('toggleIcon');
 
-            toggleButton.addEventListener('click', function () {
-                const isPassword = passwordInput.type === 'password';
-                passwordInput.type = isPassword ? 'text' : 'password';
-                toggleIcon.classList.toggle('bi-eye', isPassword);
-                toggleIcon.classList.toggle('bi-eye-slash', !isPassword);
-                toggleButton.setAttribute('aria-label', isPassword ? 'Sembunyikan password' : 'Tampilkan password');
+            if (!passwordInput || !togglePasswordButton) return;
+
+            togglePasswordButton.addEventListener('click', () => {
+                const isPasswordVisible = passwordInput.type === 'text';
+                passwordInput.type = isPasswordVisible ? 'password' : 'text';
+                togglePasswordButton.setAttribute('aria-pressed', String(!isPasswordVisible));
+                togglePasswordButton.setAttribute(
+                    'aria-label',
+                    isPasswordVisible ? 'Tampilkan password' : 'Sembunyikan password'
+                );
+                if (toggleIcon) {
+                    toggleIcon.className = isPasswordVisible ? 'bi bi-eye' : 'bi bi-eye-slash';
+                }
             });
         });
     </script>

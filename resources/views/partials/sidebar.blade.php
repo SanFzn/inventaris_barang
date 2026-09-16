@@ -31,6 +31,7 @@
     </nav>
 
     {{-- Logout --}}
+    <div class="px-3 pb-3 mt-auto border-top border-secondary pt-3">
     <div class="sidebar-logout px-3 pb-3 mt-auto border-top border-secondary pt-3">
         <form method="POST" action="{{ route('logout') }}" class="logout-form">
             @csrf

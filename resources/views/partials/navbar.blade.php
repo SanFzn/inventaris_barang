@@ -1,7 +1,7 @@
 <header class="topbar border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
     <div class="navbar-left d-flex align-items-center gap-4">
         <i class="bi bi-box-seam fs-5"></i>
-        <h1 class="h5 mb-0 fw-bold">Inventaris Barang</h1>
+        <a href="{{ route('dashboard') }}" class="navbar-brand"> Inventaris Barang</a>
         <form method="GET" action="{{ route('dashboard') }}" class="navbar-search">
             <div class="input-group input-group-sm">
                 <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
