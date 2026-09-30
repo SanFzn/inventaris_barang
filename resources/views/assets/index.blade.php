@@ -19,7 +19,7 @@
             <div class="p-4 p-lg-5">
                 @include('assets.partials.header')
                 @include('assets.partials.flash-messages')
-                @include('assets.partials.table')
+                @include('assets.partials.card')
             </div>
         </main>
     </div>

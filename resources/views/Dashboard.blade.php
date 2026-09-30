@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/assets.css') }}">
 </head>
 <body class="container-fluid">
         @include('partials.navbar')
@@ -17,15 +18,15 @@
             <main class="col-md-9 col-lg-10 px-0">
                 <div class="p-4 p-lg-5">
                     @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                        <div id="loginAlert" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm mb-4" role="alert">
+                            <i class="bi bi-check-circle-fill fs-5"></i>
+                            <div>{{ session('success') }}</div>
+                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Tutup"></button>
                         </div>
                     @endif
                     <section class="welcome-panel rounded-3 p-4 p-lg-4 mb-4">
                         <div class="row align-items-center">
                             <div class="col-lg-8">
-                                <p class="text-white-50 mb-2">Selamat datang kembali</p>
                                 <h2 class="fw-bold mb-2">Halo, {{ Auth::user()->name }}.</h2>
                                 <p class="mb-0 text-white-50">Pantau kondisi dan aktivitas inventaris dari satu tempat.</p>
                             </div>
@@ -84,9 +85,23 @@
                         <div class="col-lg-8">
                             <div class="card content-card h-100">
                                 <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-4">
-                                        <div><h2 class="h5 fw-bold mb-1">Aset Terbaru</h2></div>
-                                        <a class="btn btn-sm btn-outline-primary" href="{{ route('assets.index') }}">Lihat semua</a>
+                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+                                        <div>
+                                            <h2 class="h5 fw-bold mb-1">Aset Terbaru</h2>
+                                            <p class="text-muted small mb-0">Pantau aset yang baru ditambahkan.</p>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-center gap-1 m-0">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                                    <input type="search" name="q" class="form-control bg-light border-start-0" placeholder="Cari aset..." value="{{ request('q') }}" style="min-width: 160px; max-width: 220px;">
+                                                </div>
+                                                @if(request()->filled('q'))
+                                                    <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light" title="Reset pencarian"><i class="bi bi-x-lg"></i></a>
+                                                @endif
+                                            </form>
+                                            <a class="btn btn-sm btn-outline-primary text-nowrap" href="{{ route('assets.index') }}">Lihat semua</a>
+                                        </div>
                                     </div>
                                     @forelse($barangTerbaru as $barang)
                                         <div class="d-flex justify-content-between align-items-center border-bottom py-3">
@@ -204,15 +219,18 @@
                 <form action="{{ route('assets.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="assetName" class="form-label">Nama Aset</label>
-                            <input type="text" class="form-control" id="assetName" name="nama_barang" placeholder="Contoh: Laptop Lenovo">
-                        </div>
-                        <div class="mb-3">
-                            <label for="assetCode" class="form-label">Kode Aset</label>
-                            <input type="text" class="form-control" id="assetCode" name="kode_barang" placeholder="Contoh: AST-001">
-                        </div>
                         <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="kode_barang" class="form-label">Kode aset</label>
+                                <input id="kode_barang" name="kode_barang" class="form-control" value="{{ old('kode_barang') }}" readonly required>
+                                <div class="form-text">
+                                    Kode dibuat otomatis dari nama aset.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nama_barang" class="form-label">Nama aset</label>
+                                <input id="nama_barang" name="nama_barang" class="form-control" value="{{ old('nama_barang') }}" required>
+                            </div>
                             <div class="col-md-6">
                                 <label for="assetCategory" class="form-label">Kategori</label>
                                 <select class="form-select" id="assetCategory" name="id_kategori" required>
@@ -233,8 +251,12 @@
                             </div>
                         </div>
                         <div>
-                            <label for="assetDescription" class="form-label">Deskripsi</label>
-                            <textarea class="form-control" id="assetDescription" name="spesifikasi" rows="3"></textarea>
+                            <label for="assetDescription" class="form-label fw-semibold">Deskripsi / Spesifikasi <span class="text-danger">*</span></label>
+                            <textarea class="form-control asset-desc-input" id="assetDescription" name="spesifikasi" rows="4" placeholder="Tuliskan deskripsi lengkap atau spesifikasi barang minimal 10 kata..." required></textarea>
+                            <div class="form-text d-flex justify-content-between align-items-center mt-1">
+                                <span class="text-muted small">Wajib mendeskripsikan barang minimal 10 kata.</span>
+                                <span class="word-counter text-danger small fw-semibold">0 / 10 kata</span>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -249,6 +271,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <script src="{{ asset('js/navbar.js') }}"></script>
+    <script src="{{ asset('js/assets.js') }}"></script>
     <script src="{{ asset('js/dashboard.js') }}"></script>
 </body>
 </html>

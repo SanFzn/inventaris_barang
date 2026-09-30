@@ -45,4 +45,38 @@ document.addEventListener("DOMContentLoaded", () => {
             pendingDeleteForm.submit();
         }
     });
+
+    // Word Counter & Validation for Spesifikasi / Deskripsi
+    function countWords(text) {
+        const trimmed = (text || "").trim();
+        if (!trimmed) return 0;
+        const matches = trimmed.match(/\S+/g);
+        return matches ? matches.length : 0;
+    }
+
+    function initWordCounter(textarea) {
+        const wrapper = textarea.closest("div") || textarea.parentElement;
+        const counter = wrapper ? wrapper.querySelector(".word-counter") : null;
+        const minWords = 10;
+
+        function update() {
+            const words = countWords(textarea.value);
+            if (!counter) return;
+
+            if (words < minWords) {
+                counter.textContent = `${words} / ${minWords} kata (kurang ${minWords - words} kata)`;
+                counter.className = "word-counter text-danger small fw-semibold";
+                textarea.setCustomValidity(`Deskripsi / spesifikasi wajib diisi minimal ${minWords} kata (saat ini ${words} kata).`);
+            } else {
+                counter.textContent = `${words} / ${minWords} kata ✓`;
+                counter.className = "word-counter text-success small fw-semibold";
+                textarea.setCustomValidity("");
+            }
+        }
+
+        textarea.addEventListener("input", update);
+        update();
+    }
+
+    document.querySelectorAll(".asset-desc-input, textarea[name='spesifikasi']").forEach(initWordCounter);
 });

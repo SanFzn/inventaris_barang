@@ -1,13 +1,7 @@
 <header class="topbar border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
-    <div class="navbar-left d-flex align-items-center gap-4">
-        <i class="bi bi-box-seam fs-5"></i>
-        <a href="{{ route('dashboard') }}" class="navbar-brand"> Inventaris Barang</a>
-        <form method="GET" action="{{ route('dashboard') }}" class="navbar-search">
-            <div class="input-group input-group-sm">
-                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
-                <input type="search" name="q" class="form-control bg-light border-start-0" placeholder="Cari aset..." aria-label="Cari aset" value="{{ request('q') }}">
-            </div>
-        </form>
+    <div class="navbar-left d-flex align-items-center gap-3">
+        <i class="bi bi-box-seam fs-5 text-primary"></i>
+        <a href="{{ route('dashboard') }}" class="navbar-brand fw-bold mb-0">Inventaris Barang</a>
     </div>
     <div class="d-flex align-items-center gap-2 gap-lg-3 flex-wrap justify-content-end">
        

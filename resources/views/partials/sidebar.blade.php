@@ -1,5 +1,5 @@
 <aside class="col-md-3 col-lg-2 px-0 sidebar d-flex flex-column">
-    <div class="d-flex align-items-center gap-2 px-4 py-4 text-white">
+    <div class="d-none d-md-flex align-items-center gap-2 px-4 py-4 text-white">
         <div class="brand-mark rounded-3 d-flex align-items-center justify-content-center">
             <i class="bi bi-buildings fs-5"></i>
         </div>
@@ -28,18 +28,17 @@
         <a class="nav-link {{ request()->routeIs('qr.labels') ? 'active' : '' }}" href="{{ route('qr.labels') }}">
             <i class="bi bi-printer me-2"></i> Cetak Label QR
         </a>
-    </nav>
 
-    {{-- Logout --}}
-    <div class="px-3 pb-3 mt-auto border-top border-secondary pt-3">
-    <div class="sidebar-logout px-3 pb-3 mt-auto border-top border-secondary pt-3">
-        <form method="POST" action="{{ route('logout') }}" class="logout-form">
-            @csrf
-            <button class="btn btn-outline-danger btn-sm w-100" type="submit">
-                <i class="bi bi-box-arrow-right me-1"></i> Logout
-            </button>
-        </form>
-    </div>
+        {{-- Logout Sejajar Menu --}}
+        <div class="mt-md-auto pt-2 pt-md-3 border-top border-secondary border-opacity-25 pb-2 pb-md-3 sidebar-logout-wrapper">
+            <form method="POST" action="{{ route('logout') }}" class="logout-form m-0 w-100">
+                @csrf
+                <button type="submit" class="nav-link logout-nav-link">
+                    <i class="bi bi-box-arrow-right me-2"></i> Logout
+                </button>
+            </form>
+        </div>
+    </nav>
 </aside>
 
 {{-- Logout Confirmation Modal --}}

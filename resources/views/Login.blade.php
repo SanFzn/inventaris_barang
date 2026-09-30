@@ -65,6 +65,18 @@
                     toggleIcon.className = isPasswordVisible ? 'bi bi-eye' : 'bi bi-eye-slash';
                 }
             });
+
+            const logoutToast = document.querySelector('.logout-toast');
+            if (logoutToast) {
+                setTimeout(() => {
+                    logoutToast.classList.remove('show');
+                    setTimeout(() => {
+                        if (logoutToast.parentNode) {
+                            logoutToast.parentNode.removeChild(logoutToast);
+                        }
+                    }, 300);
+                }, 3500);
+            }
         });
     </script>
 </body>

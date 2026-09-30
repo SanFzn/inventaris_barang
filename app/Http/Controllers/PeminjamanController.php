@@ -20,7 +20,7 @@ class PeminjamanController extends Controller
             $query->where('status_pinjam', $request->input('status_pinjam'));
         }
 
-        return response()->json($query->paginate(15));
+        return response()->json($query->paginate(9));
     }
 
     public function store(Request $request)

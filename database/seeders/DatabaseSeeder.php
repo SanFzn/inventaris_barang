@@ -25,7 +25,7 @@ class DatabaseSeeder extends Seeder
             Lokasi::firstOrCreate(['nama_lokasi' => $namaLokasi]);
         }
 
-        foreach (['Laptop', 'Meja', 'Kursi', 'Printer', 'Monitor', 'Komputer', 'Tablet'] as $namaBarang) {
+        foreach (['Laptop', 'Meja', 'Kursi', 'Printer', 'Monitor', 'Komputer', 'Tablet', 'Kabel Terminal', 'Pulpen' ] as $namaBarang) {
             $kategori = Kategori::inRandomOrder()->first();
             $lokasi = Lokasi::inRandomOrder()->first();
 

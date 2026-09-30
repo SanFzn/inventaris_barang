@@ -33,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleDashboardScan(decodedText) {
         if (dashboardCameraRunning) {
             dashboardReader.stop().then(() => {
-                try { dashboardReader.clear(); } catch (e) {}
-            }).catch(() => {});
+                try { dashboardReader.clear(); } catch (e) { }
+            }).catch(() => { });
             dashboardCameraRunning = false;
             dashboardCameraButton.innerHTML = '<i class="bi bi-camera me-1"></i>Buka Kamera';
         }
@@ -44,14 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     dashboardCameraButton.addEventListener('click', async () => {
         if (dashboardCameraRunning) return;
-        try { dashboardReader.clear(); } catch (e) {}
+        try { dashboardReader.clear(); } catch (e) { }
         setDashboardStatus('Meminta izin kamera...', 'info');
         try {
             await dashboardReader.start(
                 { facingMode: 'environment' },
                 { fps: 10, qrbox: { width: 220, height: 220 } },
                 handleDashboardScan,
-                () => {}
+                () => { }
             );
             dashboardCameraRunning = true;
             dashboardCameraButton.innerHTML = '<i class="bi bi-camera-fill me-1"></i>Kamera Aktif';
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dashboardPhotoInput.addEventListener('change', async (event) => {
         const file = event.target.files[0];
         if (!file) return;
-        try { dashboardReader.clear(); } catch (e) {}
+        try { dashboardReader.clear(); } catch (e) { }
         setDashboardStatus('Membaca QR dari foto...', 'info');
         try {
             setDashboardResult(await dashboardReader.scanFile(file, false));
@@ -78,13 +78,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
     modalElement.addEventListener('hidden.bs.modal', () => {
         if (dashboardCameraRunning) {
-            dashboardReader.stop().catch(() => {});
+            dashboardReader.stop().catch(() => { });
             dashboardCameraRunning = false;
             dashboardCameraButton.innerHTML = '<i class="bi bi-camera me-1"></i>Buka Kamera';
         }
-        try { dashboardReader.clear(); } catch (e) {}
+        try { dashboardReader.clear(); } catch (e) { }
         dashboardResult.className = 'alert alert-success d-none mt-3';
         dashboardStatus.className = 'alert alert-secondary d-none mt-3';
     });
+
+    const loginAlert = document.getElementById('loginAlert');
+    if (loginAlert) {
+        setTimeout(() => {
+            loginAlert.classList.remove('show');
+            setTimeout(() => {
+                if (loginAlert.parentNode) {
+                    loginAlert.parentNode.removeChild(loginAlert);
+                }
+            }, 300);
+        }, 3500);
+    }
+
+    // Word Counter & Validation for Spesifikasi / Deskripsi
+    function countWords(text) {
+        const trimmed = (text || '').trim();
+        if (!trimmed) return 0;
+        const matches = trimmed.match(/\S+/g);
+        return matches ? matches.length : 0;
+    }
+
+    function initWordCounter(textarea) {
+        const wrapper = textarea.closest('div') || textarea.parentElement;
+        const counter = wrapper ? wrapper.querySelector('.word-counter') : null;
+        const minWords = 10;
+
+        function update() {
+            const words = countWords(textarea.value);
+            if (!counter) return;
+
+            if (words < minWords) {
+                counter.textContent = `${words} / ${minWords} kata (kurang ${minWords - words} kata)`;
+                counter.className = 'word-counter text-danger small fw-semibold';
+                textarea.setCustomValidity(`Deskripsi / spesifikasi wajib diisi minimal ${minWords} kata (saat ini ${words} kata).`);
+            } else {
+                counter.textContent = `${words} / ${minWords} kata ✓`;
+                counter.className = 'word-counter text-success small fw-semibold';
+                textarea.setCustomValidity('');
+            }
+        }
+
+        textarea.addEventListener('input', update);
+        update();
+    }
+
+    document.querySelectorAll('.asset-desc-input, textarea[name="spesifikasi"]').forEach(initWordCounter);
 });
 

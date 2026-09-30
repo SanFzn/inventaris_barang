@@ -10,7 +10,14 @@
                     <div class="col-md-6"><label class="form-label">Kategori</label><select name="id_kategori" class="form-select" required>@foreach ($kategoris as $kategori)<option value="{{ $kategori->id_kategori }}" {{ $barang->id_kategori == $kategori->id_kategori ? 'selected' : '' }}>{{ $kategori->nama_kategori }}</option>@endforeach</select></div>
                     <div class="col-md-6"><label class="form-label">Lokasi</label><select name="id_lokasi" class="form-select" required>@foreach ($lokasis as $lokasi)<option value="{{ $lokasi->id_lokasi }}" {{ $barang->id_lokasi == $lokasi->id_lokasi ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>@endforeach</select></div>
                     <div class="col-md-12"><label class="form-label">Tanggal pembelian</label><input name="tgl_pembelian" type="date" class="form-control" value="{{ optional($barang->tgl_pembelian)->format('Y-m-d') }}"></div>
-                    <div class="col-12"><label class="form-label">Spesifikasi</label><textarea name="spesifikasi" class="form-control" rows="3">{{ $barang->spesifikasi }}</textarea></div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Deskripsi / Spesifikasi <span class="text-danger">*</span></label>
+                        <textarea name="spesifikasi" class="form-control asset-desc-input" rows="4" placeholder="Tuliskan deskripsi lengkap atau spesifikasi barang minimal 10 kata..." required>{{ $barang->spesifikasi }}</textarea>
+                        <div class="form-text d-flex justify-content-between align-items-center mt-1">
+                            <span class="text-muted small">Wajib mendeskripsikan barang minimal 10 kata.</span>
+                            <span class="word-counter text-muted small fw-semibold">0 / 10 kata</span>
+                        </div>
+                    </div>
                 </div></div>
                 <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Simpan Perubahan</button></div>
             </form>
