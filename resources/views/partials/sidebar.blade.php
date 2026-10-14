@@ -13,21 +13,25 @@
             <i class="bi bi-grid-1x2-fill me-2"></i> Dashboard
         </a>
         <a class="nav-link {{ request()->routeIs('assets.*') ? 'active' : '' }}" href="{{ route('assets.index') }}">
-            <i class="bi bi-boxes me-2"></i> Kelola Aset
+            <i class="bi bi-boxes me-2"></i>
+            {{ Auth::user()->role === 'admin' ? 'Kelola Aset' : 'Daftar Aset' }}
         </a>
         <a class="nav-link {{ request()->routeIs('qr.index') ? 'active' : '' }}" href="{{ route('qr.index') }}">
             <i class="bi bi-qr-code-scan me-2"></i> Pindai dan Lacak QR
         </a>
-        <a class="nav-link {{ request()->routeIs('approvals.*') ? 'active' : '' }}" href="{{ route('approvals.index') }}">
-            <i class="bi bi-clipboard-check me-2"></i> Kelola Persetujuan
-        </a>
+        @if (Auth::user()->role === 'admin')
+            <a class="nav-link {{ request()->routeIs('approvals.*') ? 'active' : '' }}" href="{{ route('approvals.index') }}">
+                <i class="bi bi-clipboard-check me-2"></i> Kelola Persetujuan
+            </a>
+        @endif
         <a class="nav-link {{ request()->routeIs('notifications.*') ? 'active' : '' }}" href="{{ route('notifications.index') }}">
             <i class="bi bi-bell me-2"></i> Pusat Notifikasi
-            <span class="badge rounded-pill bg-warning text-dark ms-auto">0</span>
         </a>
-        <a class="nav-link {{ request()->routeIs('qr.labels') ? 'active' : '' }}" href="{{ route('qr.labels') }}">
-            <i class="bi bi-printer me-2"></i> Cetak Label QR
-        </a>
+        @if (Auth::user()->role === 'admin')
+            <a class="nav-link {{ request()->routeIs('qr.labels') ? 'active' : '' }}" href="{{ route('qr.labels') }}">
+                <i class="bi bi-printer me-2"></i> Cetak Label QR
+            </a>
+        @endif
 
         {{-- Logout Sejajar Menu --}}
         <div class="mt-md-auto pt-2 pt-md-3 border-top border-secondary border-opacity-25 pb-2 pb-md-3 sidebar-logout-wrapper">

@@ -6,9 +6,11 @@
             </div>
             <h2 class="h5 fw-bold mb-1">Belum ada aset</h2>
             <p class="text-muted mb-3">Data aset akan tampil di halaman ini setelah ditambahkan.</p>
-            <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAssetModal">
-                <i class="bi bi-plus-lg me-1"></i>Tambah Aset Pertama
-            </button>
+            @if (Auth::user()->role === 'admin')
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+                    <i class="bi bi-plus-lg me-1"></i>Tambah Aset Pertama
+                </button>
+            @endif
         </div>
     </div>
 @else
@@ -24,7 +26,7 @@
                 <div class="d-flex align-items-center gap-2">
                     <i class="bi bi-folder2-open text-primary fs-5"></i>
                     <h2 class="h5 fw-bold mb-0 text-dark">{{ $kategoriNama }}</h2>
-                    <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2.5 py-1">{{ $items->count() }} aset</span>
+                    <span class="badge bg-primary bg-opacity-10 text-white rounded-pill px-2.5 py-1">{{ $items->count() }} aset</span>
                 </div>
                 <a href="{{ route('qr.labels', ['q' => $kategoriNama]) }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1">
                     <i class="bi bi-printer"></i>
@@ -94,23 +96,45 @@
 
                                 {{-- Card Actions --}}
                                 <div class="d-flex justify-content-between align-items-center pt-3 border-top border-light mt-auto">
-                                    <a href="{{ route('qr.labels', ['kode_barang' => $barang->kode_barang]) }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" title="Cetak label QR">
-                                        <i class="bi bi-printer"></i>
-                                        <span class="d-none d-sm-inline">Cetak Label</span>
-                                    </a>
-                                    <div class="d-flex gap-2">
-                                        <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#editAsset{{ $barang->id_barang }}" title="Edit Aset">
-                                            <i class="bi bi-pencil"></i>
-                                            <span>Edit</span>
-                                        </button>
-                                        <form method="POST" action="{{ route('assets.destroy', $barang) }}" class="d-inline delete-asset-form m-0" data-asset-name="{{ $barang->nama_barang }}">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button class="btn btn-sm btn-outline-danger" type="submit" title="Hapus Aset">
-                                                <i class="bi bi-trash"></i>
+                                    @if (Auth::user()->role === 'admin')
+                                        <a href="{{ route('qr.labels', ['kode_barang' => $barang->kode_barang]) }}" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" title="Cetak label QR">
+                                            <i class="bi bi-printer"></i>
+                                            <span class="d-none d-sm-inline">Cetak Label</span>
+                                        </a>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#editAsset{{ $barang->id_barang }}" title="Edit Aset">
+                                                <i class="bi bi-pencil"></i>
+                                                <span>Edit</span>
                                             </button>
-                                        </form>
-                                    </div>
+                                            <form method="POST" action="{{ route('assets.destroy', $barang) }}" class="d-inline delete-asset-form m-0" data-asset-name="{{ $barang->nama_barang }}">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-sm btn-outline-danger" type="submit" title="Hapus Aset">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @else
+                                        <div class="w-100 d-flex justify-content-end">
+                                            @if ($barang->status === 'tersedia')
+                                                <button type="button"
+                                                    class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#borrowAssetModal"
+                                                    data-barang-id="{{ $barang->id_barang }}"
+                                                    data-barang-name="{{ $barang->nama_barang }}"
+                                                    data-barang-kode="{{ $barang->kode_barang }}">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
+                                                    <span>Pinjam</span>
+                                                </button>
+                                            @else
+                                                <button type="button" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1" disabled>
+                                                    <i class="bi bi-x-circle"></i>
+                                                    <span>Tidak Tersedia</span>
+                                                </button>
+                                            @endif
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

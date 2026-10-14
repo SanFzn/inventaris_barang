@@ -58,7 +58,7 @@ class AuthController extends Controller
             'username' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
-            'role' => 'karyawan',
+            'role' => 'user',
         ]);
 
         Auth::login($user);
@@ -80,6 +80,92 @@ class AuthController extends Controller
         return preg_match('/^\$(2y|2b|argon2)/', $password) === 1;
     }
 
+
+    // Upload foto profil
+    public function updatePhoto(Request $request)
+    {
+        $request->validate([
+            'foto_profil' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
+        ], [
+            'foto_profil.image'    => 'File harus berupa gambar.',
+            'foto_profil.mimes'    => 'Format yang didukung: JPEG, PNG, WebP.',
+            'foto_profil.max'      => 'Ukuran foto maksimal 2 MB.',
+        ]);
+
+        $user = Auth::user();
+
+        // Hapus foto lama jika ada
+        if ($user->foto_profil) {
+            $oldPath = public_path('uploads/' . $user->foto_profil);
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
+            }
+        }
+
+        $file      = $request->file('foto_profil');
+        $filename  = time() . '_' . $user->id_user . '.' . $file->getClientOriginalExtension();
+        $file->move(public_path('uploads/foto-profil'), $filename);
+
+        $user->foto_profil = 'foto-profil/' . $filename;
+        $user->save();
+
+        return back()->with('profile_success', 'Foto profil berhasil diperbarui.');
+    }
+
+    // Hapus foto profil
+    public function deletePhoto(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->foto_profil) {
+            $oldPath = public_path('uploads/' . $user->foto_profil);
+            if (file_exists($oldPath)) {
+                unlink($oldPath);
+            }
+        }
+
+        $user->foto_profil = null;
+        $user->save();
+
+        return back()->with('profile_success', 'Foto profil berhasil dihapus.');
+    }
+
+    // Update profil (username & email)
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id_user . ',id_user',
+            'email'    => 'required|email|max:255|unique:users,email,' . $user->id_user . ',id_user',
+        ]);
+
+        $user->username = $request->username;
+        $user->email    = $request->email;
+        $user->save();
+
+        return back()->with('profile_success', 'Profil berhasil diperbarui.');
+    }
+
+    // Update password
+    public function updatePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        $request->validate([
+            'current_password' => 'required',
+            'new_password'     => 'required|min:6|confirmed',
+        ]);
+
+        if (!$this->passwordMatches($request->current_password, $user->password)) {
+            return back()->with('profile_error', 'Password saat ini tidak sesuai.');
+        }
+
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+
+        return back()->with('profile_success', 'Password berhasil diperbarui.');
+    }
 
     // Proses logout
     public function logout(Request $request)

@@ -45,9 +45,7 @@
                     </div>
                 </form>
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4 no-print">
-                    <div class="d-flex align-items-center gap-2">
-                        <span id="selectedCount" class="badge bg-primary bg-opacity-10 text-primary border border-primary fs-6 px-3 py-2 rounded-pill">Belum ada label dipilih</span>
-                    </div>
+                    
                     <div class="d-flex flex-wrap gap-2">
                         <button type="button" id="selectAllBtn" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center">
                             <i class="bi bi-check-all me-1 fs-6"></i>Pilih Semua

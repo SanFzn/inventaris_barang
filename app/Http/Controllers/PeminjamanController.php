@@ -23,6 +23,16 @@ class PeminjamanController extends Controller
         return response()->json($query->paginate(9));
     }
 
+    public function approvals()
+    {
+        $peminjamans = Peminjaman::with(['user', 'barang'])
+            ->where('status_pinjam', 'menunggu')
+            ->latest('id_pinjam')
+            ->get();
+
+        return view('approvals.index', compact('peminjamans'));
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -58,34 +68,59 @@ class PeminjamanController extends Controller
         return response()->json($peminjaman->load(['user', 'barang']));
     }
 
-    public function approve(Peminjaman $peminjaman)
+    public function approve(Request $request, Peminjaman $peminjaman)
     {
-        return DB::transaction(function () use ($peminjaman) {
+        return DB::transaction(function () use ($request, $peminjaman) {
             $peminjaman->load('barang');
             if ($peminjaman->status_pinjam !== 'menunggu' || $peminjaman->barang->status !== 'tersedia') {
+                if (!$request->expectsJson()) {
+                    return redirect()->route('approvals.index')->with('error', 'Peminjaman atau barang tidak dapat disetujui.');
+                }
                 return response()->json(['message' => 'Peminjaman atau barang tidak dapat disetujui.'], 422);
             }
 
             $peminjaman->update(['status_pinjam' => 'dipinjam']);
             $peminjaman->barang->update(['status' => 'dipinjam']);
-            return response()->json($peminjaman->fresh()->load(['user', 'barang']));
+            $peminjaman = $peminjaman->fresh()->load(['user', 'barang']);
+
+            return $request->expectsJson()
+                ? response()->json($peminjaman)
+                : redirect()->route('approvals.index')->with('success', 'Peminjaman berhasil disetujui.');
         });
     }
 
-    public function reject(Peminjaman $peminjaman)
+    public function reject(Request $request, Peminjaman $peminjaman)
     {
         if ($peminjaman->status_pinjam !== 'menunggu') {
+            if (!$request->expectsJson()) {
+                return redirect()->route('approvals.index')->with('error', 'Hanya pengajuan yang menunggu yang dapat ditolak.');
+            }
             return response()->json(['message' => 'Hanya pengajuan menunggu yang dapat ditolak.'], 422);
         }
 
         $peminjaman->update(['status_pinjam' => 'ditolak']);
-        return response()->json($peminjaman->fresh()->load(['user', 'barang']));
+        $peminjaman = $peminjaman->fresh()->load(['user', 'barang']);
+
+        return $request->expectsJson()
+            ? response()->json($peminjaman)
+            : redirect()->route('approvals.index')->with('success', 'Pengajuan peminjaman ditolak.');
     }
 
-    public function returnItem(Peminjaman $peminjaman)
+    public function returnItem(Request $request, Peminjaman $peminjaman)
     {
-        return DB::transaction(function () use ($peminjaman) {
+        if ($request->user()->role !== 'admin' && $peminjaman->id_user !== $request->user()->id_user) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Akses ditolak.'], 403);
+            }
+
+            abort(403);
+        }
+
+        return DB::transaction(function () use ($request, $peminjaman) {
             if ($peminjaman->status_pinjam !== 'dipinjam') {
+                if (!$request->expectsJson()) {
+                    return redirect()->route('dashboard')->with('error', 'Peminjaman ini tidak sedang berjalan.');
+                }
                 return response()->json(['message' => 'Peminjaman ini tidak sedang berjalan.'], 422);
             }
 
@@ -94,7 +129,11 @@ class PeminjamanController extends Controller
                 'tgl_kembali' => now(),
             ]);
             $peminjaman->barang()->update(['status' => 'tersedia']);
-            return response()->json($peminjaman->fresh()->load(['user', 'barang']));
+            $peminjaman = $peminjaman->fresh()->load(['user', 'barang']);
+
+            return $request->expectsJson()
+                ? response()->json($peminjaman)
+                : redirect()->route('dashboard')->with('success', 'Barang berhasil ditandai sudah dikembalikan.');
         });
     }
 }

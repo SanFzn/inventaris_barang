@@ -1,14 +1,18 @@
 <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
     <div>
-        <h1 class="h3 fw-bold mb-1">Kelola Aset</h1>
+        <h1 class="h3 fw-bold mb-1">
+            {{ Auth::user()->role === 'admin' ? 'Kelola Aset' : 'Daftar Aset' }}
+        </h1>
         <p class="text-muted mb-0">Daftar dan kondisi aset inventaris.</p>
     </div>
-    <div class="d-flex align-items-center gap-2">
-        <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1 text-nowrap" data-bs-toggle="modal" data-bs-target="#addAssetModal">
-            <i class="bi bi-plus-lg"></i>
-            <span>Tambah Aset</span>
-        </button>
-    </div>
+    @if (Auth::user()->role === 'admin')
+        <div class="d-flex align-items-center gap-2">
+            <button type="button" class="btn btn-primary d-inline-flex align-items-center gap-1 text-nowrap" data-bs-toggle="modal" data-bs-target="#addAssetModal">
+                <i class="bi bi-plus-lg"></i>
+                <span>Tambah Aset</span>
+            </button>
+        </div>
+    @endif
 </div>
 
 <div class="card border-0 shadow-sm mb-4">

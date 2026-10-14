@@ -24,6 +24,12 @@
                             <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Tutup"></button>
                         </div>
                     @endif
+                    @if (session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                            {{ session('error') }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                        </div>
+                    @endif
                     <section class="welcome-panel rounded-3 p-4 p-lg-4 mb-4">
                         <div class="row align-items-center">
                             <div class="col-lg-8">
@@ -81,6 +87,42 @@
                         </div>
                     </section>
 
+                    @if (Auth::user()->role !== 'admin')
+                        <section class="mb-4" id="peminjaman-saya">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h2 class="h5 fw-bold mb-1">Peminjaman Saya</h2>
+                                    <p class="text-muted small mb-0">Tandai barang setelah diserahkan kembali.</p>
+                                </div>
+                            </div>
+                            <div class="card content-card">
+                                <div class="card-body p-0">
+                                    @forelse ($peminjamanAktif as $peminjaman)
+                                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom p-3 p-md-4">
+                                            <div>
+                                                <div class="fw-semibold">{{ $peminjaman->barang->nama_barang ?? 'Barang tidak ditemukan' }}</div>
+                                                <small class="text-muted">
+                                                    {{ $peminjaman->barang->kode_barang ?? '-' }}
+                                                    @if ($peminjaman->tgl_kembali)
+                                                        · Rencana kembali {{ $peminjaman->tgl_kembali->format('d M Y, H:i') }}
+                                                    @endif
+                                                </small>
+                                            </div>
+                                            <form method="POST" action="{{ route('loans.return', $peminjaman->id_pinjam) }}" onsubmit="return confirm('Tandai barang ini sudah dikembalikan?')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-success text-nowrap">
+                                                    <i class="bi bi-box-arrow-in-down me-1"></i>Tandai Dikembalikan
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @empty
+                                        <div class="text-center py-4 text-muted">Tidak ada barang yang sedang Anda pinjam.</div>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </section>
+                    @endif
+
                     <section class="row g-4" id="laporan">
                         <div class="col-lg-8">
                             <div class="card content-card h-100">
@@ -129,17 +171,24 @@
                                         @if (Auth::user()->role === 'admin')
                                             <a class="quick-action" href="#newAssetModal" data-bs-toggle="modal">
                                                 <i class="bi bi-plus-circle"></i>
-                                                <span class="small fw-semibold text-center">Tambah Aset</span>
+                                                <span class="small fw-semibold text-center">Tambah Aset</span>  
                                             </a>
                                         @endif
                                         <a class="quick-action" href="#scanQrModal" data-bs-toggle="modal">
                                             <i class="bi bi-qr-code-scan"></i>
                                             <span class="small fw-semibold text-center">Pindai QR</span>
                                         </a>
-                                        <a class="quick-action" href="{{ route('qr.labels') }}">
-                                            <i class="bi bi-printer"></i>
-                                            <span class="small fw-semibold text-center">Cetak Label QR</span>
-                                        </a>
+                                        @if (Auth::user()->role === 'admin')
+                                            <a class="quick-action" href="{{ route('qr.labels') }}">
+                                                <i class="bi bi-printer"></i>
+                                                <span class="small fw-semibold text-center">Cetak Label QR</span>
+                                            </a>
+                                        @else
+                                            <a class="quick-action" href="#borrowAssetModal" data-bs-toggle="modal">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                                <span class="small fw-semibold text-center">Pinjam Barang</span>
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -176,7 +225,7 @@
                         </div>
                         <div>
                             <label for="borrowNote" class="form-label">Keterangan</label>
-                            <textarea id="borrowNote" name="keterangan" class="form-control" rows="3" placeholder="Keperluan peminjaman"></textarea>
+                            <textarea id="borrowNote" name="keterangan" class="form-control" rows="3" placeholder="Keperluan peminjaman" required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">

@@ -22,13 +22,31 @@
                         <p class="text-muted mb-0">Pantau pembaruan dan aktivitas inventaris.</p>
                     </div>
                 </div>
-                <section class="card border-0 shadow-sm">
-                    <div class="card-body text-center py-5">
-                        <i class="bi bi-bell-slash text-secondary" style="font-size: 3rem;"></i>
-                        <h2 class="h5 mt-3">Belum ada notifikasi</h2>
-                        <p class="text-muted mb-0">Notifikasi baru akan muncul saat ada aktivitas pada inventaris.</p>
-                    </div>
-                </section>
+                @forelse ($notifications as $notification)
+                    <a href="{{ $notification['link'] }}" class="card border-0 shadow-sm text-decoration-none text-dark mb-3">
+                        <div class="card-body d-flex align-items-start gap-3">
+                            <i class="bi {{ $notification['icon'] }} {{ $notification['icon_color'] }} fs-4"></i>
+                            <div class="flex-grow-1">
+                                <div class="d-flex justify-content-between gap-3">
+                                    <h2 class="h6 fw-bold mb-1">{{ $notification['title'] }}</h2>
+                                    <small class="text-muted text-nowrap">{{ $notification['timestamp'] }}</small>
+                                </div>
+                                <p class="text-muted mb-0">{{ $notification['message'] }}</p>
+                            </div>
+                            @unless ($notification['read'])
+                                <span class="badge bg-primary">Baru</span>
+                            @endunless
+                        </div>
+                    </a>
+                @empty
+                    <section class="card border-0 shadow-sm">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-bell-slash text-secondary" style="font-size: 3rem;"></i>
+                            <h2 class="h5 mt-3">Belum ada notifikasi</h2>
+                            <p class="text-muted mb-0">Notifikasi baru akan muncul saat ada aktivitas pada inventaris.</p>
+                        </div>
+                    </section>
+                @endforelse
             </div>
         </main>
     </div>
