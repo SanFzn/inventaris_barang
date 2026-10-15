@@ -19,6 +19,7 @@ class CreateBarangTable extends Migration
             $table->unsignedInteger('id_lokasi');
             $table->text('spesifikasi')->nullable();
             $table->date('tgl_pembelian')->nullable();
+            $table->integer('harga')->unsigned()->nullable();
             $table->enum('status', ['tersedia', 'dipinjam', 'rusak', 'maintenance']);
             $table->string('file_qr', 255)->nullable();
             $table->index('id_kategori');

@@ -298,6 +298,18 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-md-6">
+                                <label for="tgl_pembelian" class="form-label">Tanggal pembelian</label>
+                                <input id="tgl_pembelian" name="tgl_pembelian" type="date" class="form-control" value="{{ old('tgl_pembelian') }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="harga" class="form-label">Harga</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input id="harga" type="text" class="form-control harga-input" value="{{ old('harga') ? number_format(old('harga'), 0, ',', '.') : '' }}" placeholder="Masukkan harga" required>
+                                    <input type="hidden" name="harga" class="harga-raw-input" value="{{ old('harga', 0) }}">
+                                </div>
+                            </div>
                         </div>
                         <div>
                             <label for="assetDescription" class="form-label fw-semibold">Deskripsi / Spesifikasi <span class="text-danger">*</span></label>

@@ -115,7 +115,25 @@
                                             </form>
                                         </div>
                                     @else
-                                        <div class="w-100 d-flex justify-content-end">
+                                        <div class="w-100 d-flex justify-content-end align-items-center gap-2">
+                                            <button type="button"
+                                                class="btn btn-sm btn-outline-info d-inline-flex align-items-center gap-1"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#detailAssetModal"
+                                                data-barang-id="{{ $barang->id_barang }}"
+                                                data-barang-name="{{ $barang->nama_barang }}"
+                                                data-barang-kode="{{ $barang->kode_barang }}"
+                                                data-barang-kategori="{{ $barang->kategori->nama_kategori ?? 'Tanpa Kategori' }}"
+                                                data-barang-lokasi="{{ $barang->lokasi->nama_lokasi ?? 'Tanpa Lokasi' }}"
+                                                data-barang-tgl="{{ optional($barang->tgl_pembelian)->format('d M Y') ?? '-' }}"
+                                                data-barang-harga="{{ 'Rp ' . number_format($barang->harga ?? 0, 0, ',', '.') }}"
+                                                data-barang-spec="{{ $barang->spesifikasi ?? 'Tidak ada spesifikasi.' }}"
+                                                data-barang-status="{{ $barang->status }}"
+                                                data-barang-image="{{ route('qr.generate', $barang->kode_barang) }}">
+                                                <i class="bi bi-info-circle"></i>
+                                                <span>Detail</span>
+                                            </button>
+
                                             @if ($barang->status === 'tersedia')
                                                 <button type="button"
                                                     class="btn btn-sm btn-primary d-inline-flex align-items-center gap-1"

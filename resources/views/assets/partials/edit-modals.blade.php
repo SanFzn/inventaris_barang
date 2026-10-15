@@ -1,26 +1,88 @@
 @foreach ($barangs as $barang)
     <div class="modal fade" id="editAsset{{ $barang->id_barang }}" tabindex="-1" aria-labelledby="editAssetLabel{{ $barang->id_barang }}" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered"><div class="modal-content">
-            <div class="modal-header"><h2 class="modal-title h5" id="editAssetLabel{{ $barang->id_barang }}"><i class="bi bi-pencil me-2 text-primary"></i>Edit Aset</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button></div>
-            <form method="POST" action="{{ route('assets.update', $barang) }}">
-                @csrf @method('PUT')
-                <div class="modal-body"><div class="row g-3">
-                    <div class="col-md-6"><label class="form-label">Kode aset</label><input name="kode_barang" class="form-control" value="{{ $barang->kode_barang }}" readonly required></div>
-                    <div class="col-md-6"><label class="form-label">Nama aset</label><input name="nama_barang" class="form-control" value="{{ $barang->nama_barang }}" required></div>
-                    <div class="col-md-6"><label class="form-label">Kategori</label><select name="id_kategori" class="form-select" required>@foreach ($kategoris as $kategori)<option value="{{ $kategori->id_kategori }}" {{ $barang->id_kategori == $kategori->id_kategori ? 'selected' : '' }}>{{ $kategori->nama_kategori }}</option>@endforeach</select></div>
-                    <div class="col-md-6"><label class="form-label">Lokasi</label><select name="id_lokasi" class="form-select" required>@foreach ($lokasis as $lokasi)<option value="{{ $lokasi->id_lokasi }}" {{ $barang->id_lokasi == $lokasi->id_lokasi ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>@endforeach</select></div>
-                    <div class="col-md-12"><label class="form-label">Tanggal pembelian</label><input name="tgl_pembelian" type="date" class="form-control" value="{{ optional($barang->tgl_pembelian)->format('Y-m-d') }}"></div>
-                    <div class="col-12">
-                        <label class="form-label fw-semibold">Deskripsi / Spesifikasi <span class="text-danger">*</span></label>
-                        <textarea name="spesifikasi" class="form-control asset-desc-input" rows="4" placeholder="Tuliskan deskripsi lengkap atau spesifikasi barang minimal 10 kata..." required>{{ $barang->spesifikasi }}</textarea>
-                        <div class="form-text d-flex justify-content-between align-items-center mt-1">
-                            <span class="text-muted small">Wajib mendeskripsikan barang minimal 10 kata.</span>
-                            <span class="word-counter text-muted small fw-semibold">0 / 10 kata</span>
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="editAssetLabel{{ $barang->id_barang }}">
+                        <i class="bi bi-pencil me-2 text-primary"></i>Edit Aset
+                    </h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+
+                <form method="POST" action="{{ route('assets.update', $barang) }}">
+                    @csrf
+                    @method('PUT')
+
+                    <div class="modal-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="kode_barang_{{ $barang->id_barang }}" class="form-label">Kode aset</label>
+                                <input id="kode_barang_{{ $barang->id_barang }}" name="kode_barang" class="form-control" value="{{ $barang->kode_barang }}" readonly required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="nama_barang_{{ $barang->id_barang }}" class="form-label">Nama aset</label>
+                                <input id="nama_barang_{{ $barang->id_barang }}" name="nama_barang" class="form-control" value="{{ $barang->nama_barang }}" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_kategori_{{ $barang->id_barang }}" class="form-label">Kategori</label>
+                                <select id="id_kategori_{{ $barang->id_barang }}" name="id_kategori" class="form-select" required>
+                                    @foreach ($kategoris as $kategori)
+                                        <option value="{{ $kategori->id_kategori }}" {{ $barang->id_kategori == $kategori->id_kategori ? 'selected' : '' }}>
+                                            {{ $kategori->nama_kategori }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="id_lokasi_{{ $barang->id_barang }}" class="form-label">Lokasi</label>
+                                <select id="id_lokasi_{{ $barang->id_barang }}" name="id_lokasi" class="form-select" required>
+                                    @foreach ($lokasis as $lokasi)
+                                        <option value="{{ $lokasi->id_lokasi }}" {{ $barang->id_lokasi == $lokasi->id_lokasi ? 'selected' : '' }}>
+                                            {{ $lokasi->nama_lokasi }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="tgl_pembelian_{{ $barang->id_barang }}" class="form-label">Tanggal pembelian</label>
+                                <input id="tgl_pembelian_{{ $barang->id_barang }}" name="tgl_pembelian" type="date" class="form-control" value="{{ optional($barang->tgl_pembelian)->format('Y-m-d') }}">
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="harga_{{ $barang->id_barang }}" class="form-label">Harga</label>
+                                <div class="input-group">
+                                    <small class="input-group-text">Rp</small>
+                                    <input id="harga_{{ $barang->id_barang }}" type="text" class="form-control harga-input" value="{{number_format($barang->harga, 0, ',', '.') }}" placeholder="Masukkan harga" required>
+                                    <input type="hidden" name="harga" class="harga-raw-input" value="{{ $barang->harga }}">
+                                </div>
+                            </div>
+
+                            <div class="col-12">
+                                <label for="spesifikasi_{{ $barang->id_barang }}" class="form-label fw-semibold">Deskripsi / Spesifikasi <span class="text-danger">*</span></label>
+                                <textarea id="spesifikasi_{{ $barang->id_barang }}" name="spesifikasi" class="form-control asset-desc-input @error('spesifikasi') is-invalid @enderror" rows="4" placeholder="Tuliskan deskripsi lengkap atau spesifikasi barang minimal 10 kata..." required>{{ $barang->spesifikasi }}</textarea>
+                                <div class="form-text d-flex justify-content-between align-items-center mt-1">
+                                    <span class="text-muted small">Wajib mendeskripsikan barang minimal 10 kata.</span>
+                                    <span class="word-counter text-muted small fw-semibold">0 / 10 kata</span>
+                                </div>
+                                @error('spesifikasi')
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                     </div>
-                </div></div>
-                <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Simpan Perubahan</button></div>
-            </form>
-        </div></div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Simpan Perubahan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 @endforeach

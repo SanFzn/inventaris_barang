@@ -32,11 +32,12 @@ class DatabaseSeeder extends Seeder
             \App\Models\Barang::firstOrCreate(
                 ['nama_barang' => $namaBarang],
                 [
-                    'kode_barang' => 'BRG-' . strtoupper(substr($namaBarang, 0, 4)) . '-' . rand(100, 999),
+                    'kode_barang' => 'BRG-' . strtoupper(substr($namaBarang, 0, 3)) . '-' . rand(100, 999),
                     'id_kategori' => $kategori->id_kategori,
                     'id_lokasi' => $lokasi->id_lokasi,
                     'spesifikasi' => 'Spesifikasi untuk ' . $namaBarang,
                     'tgl_pembelian' => now(),
+                    'harga' => rand(100000, 1000000),
                     'status' => 'tersedia',
                     'file_qr' => null,
                 ]

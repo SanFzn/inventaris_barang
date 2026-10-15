@@ -2,6 +2,31 @@
  * Asset Management Page Script (/aset)
  */
 document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('.harga-input').forEach((input) => {
+        const rawInput = input.parentElement?.querySelector('.harga-raw-input');
+
+        const formatRupiah = (value) => {
+            const digits = value.replace(/\D/g, '');
+            if (!digits) {
+                if (rawInput) rawInput.value = '';
+                return '';
+            }
+
+            const formatted = new Intl.NumberFormat('id-ID').format(Number(digits));
+            if (rawInput) rawInput.value = digits;
+            return `${formatted}`;
+        };
+
+        const initialValue = rawInput ? rawInput.value : input.value;
+        if (initialValue) {
+            input.value = formatRupiah(String(initialValue));
+        }
+
+        input.addEventListener('input', () => {
+            input.value = formatRupiah(input.value);
+        });
+    });
+
     const assetNameInput = document.getElementById("nama_barang");
     const assetCodeInput = document.getElementById("kode_barang");
 

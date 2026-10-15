@@ -29,6 +29,57 @@
         @include('assets.partials.edit-modals')
         @include('assets.partials.delete-modal')
     @else
+        <div class="modal fade" id="detailAssetModal" tabindex="-1" aria-labelledby="detailAssetModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header">
+                        <h2 class="modal-title h5 fw-bold" id="detailAssetModalLabel"><i class="bi bi-info-circle me-2 text-info"></i>Detail Barang</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-5 text-center">
+                                <img id="detailAssetImage" src="" alt="QR Barang" class="img-fluid rounded-3 border shadow-sm bg-light" style="max-height: 240px; object-fit: contain;">
+                            </div>
+                            <div class="col-md-7">
+                                <div class="mb-2">
+                                    <span id="detailAssetStatus" class="badge bg-success px-2 py-1"></span>
+                                </div>
+                                <h3 id="detailAssetName" class="h4 fw-bold mb-2"></h3>
+                                <p id="detailAssetCode" class="text-muted mb-3"></p>
+
+                                <div class="small text-muted">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-tag text-primary"></i>
+                                        <span id="detailAssetCategory"></span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-geo-alt text-danger"></i>
+                                        <span id="detailAssetLocation"></span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-calendar3 text-success"></i>
+                                        <span id="detailAssetTanggal"></span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-currency-dollar text-warning"></i>
+                                        <span id="detailAssetPrice"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Spesifikasi</label>
+                                <p id="detailAssetSpec" class="mb-0 text-secondary"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         {{-- Modal Pinjam Barang untuk User --}}
         <div class="modal fade" id="borrowAssetModal" tabindex="-1" aria-labelledby="borrowAssetModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -71,14 +122,39 @@
     <script src="{{ asset('js/dashboard.js') }}"></script>
     @if (Auth::user()->role !== 'admin')
     <script>
-        // Populate borrow modal with card data
         const borrowModal = document.getElementById('borrowAssetModal');
+        const detailModal = document.getElementById('detailAssetModal');
+
         if (borrowModal) {
             borrowModal.addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
                 document.getElementById('borrowAssetId').value = button.getAttribute('data-barang-id');
                 document.getElementById('borrowAssetName').value =
                     button.getAttribute('data-barang-kode') + ' - ' + button.getAttribute('data-barang-name');
+            });
+        }
+
+        if (detailModal) {
+            detailModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const status = button.getAttribute('data-barang-status');
+                const statusBadge = document.getElementById('detailAssetStatus');
+
+                statusBadge.textContent = status === 'tersedia' ? 'Tersedia' : status === 'dipinjam' ? 'Dipinjam' : 'Tidak Tersedia';
+                statusBadge.className = status === 'tersedia'
+                    ? 'badge bg-success px-2 py-1'
+                    : status === 'dipinjam'
+                        ? 'badge bg-warning text-dark px-2 py-1'
+                        : 'badge bg-secondary px-2 py-1';
+
+                document.getElementById('detailAssetName').textContent = button.getAttribute('data-barang-name');
+                document.getElementById('detailAssetCode').textContent = button.getAttribute('data-barang-kode');
+                document.getElementById('detailAssetCategory').textContent = button.getAttribute('data-barang-kategori');
+                document.getElementById('detailAssetLocation').textContent = button.getAttribute('data-barang-lokasi');
+                document.getElementById('detailAssetTanggal').textContent = button.getAttribute('data-barang-tgl');
+                document.getElementById('detailAssetPrice').textContent = button.getAttribute('data-barang-harga');
+                document.getElementById('detailAssetSpec').textContent = button.getAttribute('data-barang-spec') || 'Tidak ada spesifikasi.';
+                document.getElementById('detailAssetImage').src = button.getAttribute('data-barang-image');
             });
         }
     </script>

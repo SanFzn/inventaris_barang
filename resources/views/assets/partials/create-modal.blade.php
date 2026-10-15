@@ -8,6 +8,15 @@
                 <div class="col-md-6"><label for="nama_barang" class="form-label">Nama aset</label><input id="nama_barang" name="nama_barang" class="form-control" value="{{ old('nama_barang') }}" required></div>
                 <div class="col-md-6"><label for="id_kategori" class="form-label">Kategori</label><select id="id_kategori" name="id_kategori" class="form-select" required><option value="">Pilih kategori</option>@foreach ($kategoris as $kategori)<option value="{{ $kategori->id_kategori }}" {{ old('id_kategori') == $kategori->id_kategori ? 'selected' : '' }}>{{ $kategori->nama_kategori }}</option>@endforeach</select></div>
                 <div class="col-md-6"><label for="id_lokasi" class="form-label">Lokasi</label><select id="id_lokasi" name="id_lokasi" class="form-select" required><option value="">Pilih lokasi</option>@foreach ($lokasis as $lokasi)<option value="{{ $lokasi->id_lokasi }}" {{ old('id_lokasi') == $lokasi->id_lokasi ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>@endforeach</select></div>
+                <div class="col-md-6"><label for="tgl_pembelian" class="form-label">Tanggal pembelian</label><input id="tgl_pembelian" name="tgl_pembelian" type="date" class="form-control" value="{{ old('tgl_pembelian') }}" required></div>
+                <div class="col-md-6">
+                    <label for="harga" class="form-label">Harga</label>
+                    <div class="input-group">
+                        <small class="input-group-text">Rp</small>
+                        <input id="harga" type="text" class="form-control harga-input" value="{{ old('harga') ? 'Rp ' . number_format(old('harga'), 0, ',', '.') : '' }}" placeholder="Masukkan harga" required>
+                        <input type="hidden" name="harga" class="harga-raw-input" value="{{ old('harga', 0) }}">
+                    </div>
+                </div>
                 <div class="col-12">
                     <label for="spesifikasi" class="form-label fw-semibold">Deskripsi / Spesifikasi <span class="text-danger">*</span></label>
                     <textarea id="spesifikasi" name="spesifikasi" class="form-control asset-desc-input @error('spesifikasi') is-invalid @enderror" rows="4" placeholder="Tuliskan deskripsi lengkap atau spesifikasi barang minimal 10 kata..." required>{{ old('spesifikasi') }}</textarea>
