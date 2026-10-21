@@ -108,9 +108,11 @@
                                                     @endif
                                                 </small>
                                             </div>
-                                            <form method="POST" action="{{ route('loans.return', $peminjaman->id_pinjam) }}" onsubmit="return confirm('Tandai barang ini sudah dikembalikan?')">
+                                            <form method="POST" action="{{ route('loans.return', $peminjaman->id_pinjam) }}" id="returnForm-{{ $peminjaman->id_pinjam }}">
                                                 @csrf
-                                                <button type="submit" class="btn btn-sm btn-outline-success text-nowrap">
+                                                <button type="button" class="btn btn-sm btn-outline-success text-nowrap btn-confirm-return"
+                                                    data-form-id="returnForm-{{ $peminjaman->id_pinjam }}"
+                                                    data-barang-name="{{ $peminjaman->barang->nama_barang ?? 'Barang' }}">
                                                     <i class="bi bi-box-arrow-in-down me-1"></i>Tandai Dikembalikan
                                                 </button>
                                             </form>
@@ -237,6 +239,25 @@
         </div>
     </div>
 
+    {{-- Modal Konfirmasi Pengembalian --}}
+    <div class="modal fade" id="confirmReturnModal" tabindex="-1" aria-labelledby="confirmReturnModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="confirmReturnModalLabel"><i class="bi bi-box-arrow-in-down me-2 text-success"></i>Konfirmasi</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Tandai barang <strong id="confirmReturnItemName"></strong> sudah dikembalikan?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-success" id="confirmReturnBtn"><i class="bi bi-check-lg me-1"></i>Ya, Kembalikan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="scanQrModal" tabindex="-1" aria-labelledby="scanQrModalLabel" aria-hidden="true" data-generate-url="{{ route('qr.generate', ':code') }}">
         <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
             <div class="modal-content border-0 shadow">
@@ -334,5 +355,23 @@
     <script src="{{ asset('js/navbar.js') }}"></script>
     <script src="{{ asset('js/assets.js') }}"></script>
     <script src="{{ asset('js/dashboard.js') }}"></script>
+
+    <script>
+        // Confirm return modal handler
+        let returnFormId = null;
+        document.querySelectorAll('.btn-confirm-return').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                returnFormId = this.getAttribute('data-form-id');
+                document.getElementById('confirmReturnItemName').textContent = this.getAttribute('data-barang-name');
+                var modal = new bootstrap.Modal(document.getElementById('confirmReturnModal'));
+                modal.show();
+            });
+        });
+        document.getElementById('confirmReturnBtn').addEventListener('click', function() {
+            if (returnFormId) {
+                document.getElementById(returnFormId).submit();
+            }
+        });
+    </script>
 </body>
 </html>

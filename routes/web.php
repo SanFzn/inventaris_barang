@@ -44,6 +44,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/peminjaman', [PeminjamanController::class, 'store'])->name('loans.store');
     Route::post('/peminjaman/{peminjaman}/kembali', [PeminjamanController::class, 'returnItem'])->name('loans.return');
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifikasi/baca-semua', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::post('/notifikasi/{id}/baca', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
 
     // Admin-only routes
     Route::middleware('admin')->group(function () {

@@ -13,11 +13,15 @@ class NotificationController extends Controller
 
     /**
      * Display the notification center page.
+     * Automatically marks all notifications as read when viewed.
      */
     public function index(Request $request)
     {
         $notifications = $this->notificationService->getNotifications($request->user());
         $unreadCount = $this->notificationService->getUnreadCount($request->user());
+
+        // Mark all notifications as read when the user opens the notification page
+        $this->notificationService->markAllAsRead($request->user());
 
         return view('notifications.index', [
             'notifications' => $notifications,
