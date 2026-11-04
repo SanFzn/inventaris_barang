@@ -19,9 +19,22 @@
         <a class="nav-link {{ request()->routeIs('qr.index') ? 'active' : '' }}" href="{{ route('qr.index') }}">
             <i class="bi bi-qr-code-scan me-2"></i> Pindai dan Lacak QR
         </a>
+        @if (Auth::user()->role !== 'admin')
+            <a class="nav-link {{ request()->routeIs('loans.my') ? 'active' : '' }}" href="{{ route('loans.my') }}">
+                <i class="bi bi-clock-history me-2"></i> Peminjaman Saya
+            </a>
+        @endif
         @if (Auth::user()->role === 'admin')
-            <a class="nav-link {{ request()->routeIs('approvals.*') ? 'active' : '' }}" href="{{ route('approvals.index') }}">
-                <i class="bi bi-clipboard-check me-2"></i> Kelola Persetujuan
+            <a class="nav-link d-flex align-items-center justify-content-between {{ request()->routeIs('approvals.*') ? 'active' : '' }}" href="{{ route('approvals.index') }}">
+                <div>
+                    <i class="bi bi-clipboard-check me-2"></i> Kelola Persetujuan
+                </div>
+                <span class="badge bg-danger rounded-pill px-2 {{ ($pendingApprovalsCount ?? 0) > 0 ? '' : 'd-none' }}" id="sidebar-approvals-badge">
+                    {{ $pendingApprovalsCount ?? 0 }}
+                </span>
+            </a>
+            <a class="nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                <i class="bi bi-people me-2"></i> Kelola Pengguna
             </a>
         @endif
         <a class="nav-link {{ request()->routeIs('notifications.*') ? 'active' : '' }}" href="{{ route('notifications.index') }}">

@@ -6,6 +6,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\QrController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -41,6 +42,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     Route::get('/aset', [BarangController::class, 'index'])->name('assets.index');
+    Route::get('/peminjaman-saya', [DashboardController::class, 'myLoans'])->name('loans.my');
     Route::post('/peminjaman', [PeminjamanController::class, 'store'])->name('loans.store');
     Route::post('/peminjaman/{peminjaman}/kembali', [PeminjamanController::class, 'returnItem'])->name('loans.return');
     Route::get('/notifikasi', [NotificationController::class, 'index'])->name('notifications.index');
@@ -53,10 +55,17 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/aset/{barang}', [BarangController::class, 'update'])->name('assets.update');
         Route::delete('/aset/{barang}', [BarangController::class, 'destroy'])->name('assets.destroy');
         Route::get('/persetujuan', [PeminjamanController::class, 'approvals'])->name('approvals.index');
+        Route::get('/persetujuan/check-pending', [PeminjamanController::class, 'checkPending'])->name('approvals.checkPending');
         Route::post('/persetujuan/{peminjaman}/setujui', [PeminjamanController::class, 'approve'])->name('approvals.approve');
         Route::post('/persetujuan/{peminjaman}/tolak', [PeminjamanController::class, 'reject'])->name('approvals.reject');
 
         // QR Labels
         Route::get('/qr/labels', [BarangController::class, 'labels'])->name('qr.labels');
+
+        // Kelola Pengguna
+        Route::get('/pengguna', [UserController::class, 'index'])->name('users.index');
+        Route::post('/pengguna', [UserController::class, 'store'])->name('users.store');
+        Route::put('/pengguna/{user}', [UserController::class, 'update'])->name('users.update');
+        Route::delete('/pengguna/{user}', [UserController::class, 'destroy'])->name('users.destroy');
     });
 });

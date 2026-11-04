@@ -30,6 +30,29 @@
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
                         </div>
                     @endif
+
+                    @if (Auth::user()->role === 'admin' && ($pendingApprovalsCount ?? 0) > 0)
+                        <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm d-flex flex-column flex-md-row align-items-md-center justify-content-between p-3 p-md-4 mb-4 rounded-3" role="alert">
+                            <div class="d-flex align-items-center gap-3 mb-3 mb-md-0">
+                                <div class="rounded-circle bg-warning bg-opacity-25 text-dark d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px;">
+                                    <i class="bi bi-bell-fill fs-5 text-warning"></i>
+                                </div>
+                                <div>
+                                    <h3 class="h6 fw-bold mb-1 text-dark">Pemberitahuan Peminjaman Barang!</h3>
+                                    <p class="mb-0 text-muted small">
+                                        Ada <strong>{{ $pendingApprovalsCount }}</strong> pengajuan peminjaman barang baru dari user yang menunggu persetujuan Anda.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="{{ route('approvals.index') }}" class="btn btn-warning btn-sm text-dark fw-bold px-3 py-2 shadow-sm text-nowrap">
+                                    <i class="bi bi-clipboard-check me-1"></i> Tinjau Pengajuan
+                                </a>
+                                <button type="button" class="btn-close ms-2 position-static" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                            </div>
+                        </div>
+                    @endif
+
                     <section class="welcome-panel rounded-3 p-4 p-lg-4 mb-4">
                         <div class="row align-items-center">
                             <div class="col-lg-8">
@@ -39,6 +62,8 @@
                         </div>
                     </section>
 
+                    @if (Auth::user()->role === 'admin')
+                    {{-- ===== ADMIN STATS CARDS ===== --}}
                     <section class="row g-4 stats-grid mb-4" id="inventaris">
                         <div class="col-sm-6 col-xl">
                             <div class="card stat-card h-100 p-3">
@@ -46,7 +71,11 @@
                                     <div><p class="text-muted small mb-2">Total Barang</p><h3 class="fw-bold mb-0">{{ $totalBarang }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-box-seam fs-5"></i></div>
                                 </div>
-                                <small class="text-muted mt-3"><i class="bi bi-dash"></i> Belum ada data</small>
+                                @if ($totalBarang > 0)
+                                    <small class="text-primary mt-3"><i class="bi bi-boxes"></i> Keseluruhan aset terdata</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Belum ada data</small>
+                                @endif
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl">
@@ -55,7 +84,11 @@
                                     <div><p class="text-muted small mb-2">Tersedia</p><h3 class="fw-bold mb-0">{{ $barangTersedia }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-check-circle fs-5"></i></div>
                                 </div>
-                                <small class="text-success mt-3"><i class="bi bi-arrow-up"></i> Siap digunakan</small>
+                                @if ($barangTersedia > 0)
+                                    <small class="text-success mt-3"><i class="bi bi-arrow-up"></i> Siap digunakan</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Tidak ada barang tersedia</small>
+                                @endif
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl" id="peminjaman">
@@ -64,7 +97,11 @@
                                     <div><p class="text-muted small mb-2">Dipinjam</p><h3 class="fw-bold mb-0">{{ $barangDipinjam }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-arrow-left-right fs-5"></i></div>
                                 </div>
-                                <small class="text-muted mt-3">Tidak ada peminjaman aktif</small>
+                                @if ($barangDipinjam > 0)
+                                    <small class="text-primary mt-3"><i class="bi bi-arrow-left-right"></i> Sedang dipinjam</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Tidak ada peminjaman aktif</small>
+                                @endif
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl">
@@ -73,7 +110,11 @@
                                     <div><p class="text-muted small mb-2">Perlu Perbaikan</p><h3 class="fw-bold mb-0">{{ $barangRusak }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-tools fs-5"></i></div>
                                 </div>
-                                <small class="text-muted mt-3">Semua kondisi terpantau</small>
+                                @if ($barangRusak > 0)
+                                    <small class="text-warning mt-3"><i class="bi bi-exclamation-triangle"></i> Butuh perbaikan/servis</small>
+                                @else
+                                    <small class="text-success mt-3"><i class="bi bi-check-circle"></i> Semua kondisi terpantau</small>
+                                @endif
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl" id="peminjaman-terlambat">
@@ -82,10 +123,71 @@
                                     <div><p class="text-muted small mb-2">Peminjaman Terlambat</p><h3 class="fw-bold mb-0">{{ $peminjamanTerlambat }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-exclamation-triangle-fill fs-5"></i></div>
                                 </div>
-                                <small class="text-danger mt-3"><i class="bi bi-arrow-up"></i> Perlu tindakan langsung</small>
+                                @if ($peminjamanTerlambat > 0)
+                                    <small class="text-danger mt-3"><i class="bi bi-arrow-up"></i> Perlu tindakan langsung</small>
+                                @else
+                                    <small class="text-success mt-3"><i class="bi bi-check-circle"></i> Tidak ada keterlambatan</small>
+                                @endif
                             </div>
                         </div>
                     </section>
+                    @else
+                    {{-- ===== USER STATS CARDS ===== --}}
+                    <section class="row g-4 stats-grid-4 mb-4" id="inventaris">
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card stat-card h-100 p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div><p class="text-muted small mb-2">Aset Aktif Saya</p><h3 class="fw-bold mb-0">{{ $userAktif }}</h3></div>
+                                    <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-box-seam fs-5"></i></div>
+                                </div>
+                                @if ($userAktif > 0)
+                                    <small class="text-success mt-3"><i class="bi bi-arrow-up"></i> Sedang digunakan</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Belum ada aset dipinjam</small>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card stat-card h-100 p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div><p class="text-muted small mb-2">Menunggu Admin</p><h3 class="fw-bold mb-0">{{ $userMenunggu }}</h3></div>
+                                    <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-hourglass-split fs-5"></i></div>
+                                </div>
+                                @if ($userMenunggu > 0)
+                                    <small class="text-warning mt-3"><i class="bi bi-clock"></i> Menunggu persetujuan</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Tidak ada pengajuan</small>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card stat-card h-100 p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div><p class="text-muted small mb-2">Status Terlambat</p><h3 class="fw-bold mb-0">{{ $userTerlambat }}</h3></div>
+                                    <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-exclamation-triangle-fill fs-5"></i></div>
+                                </div>
+                                @if ($userTerlambat > 0)
+                                    <small class="text-danger mt-3"><i class="bi bi-arrow-up"></i> Perlu segera dikembalikan</small>
+                                @else
+                                    <small class="text-success mt-3"><i class="bi bi-check-circle"></i> Tidak ada keterlambatan</small>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card stat-card h-100 p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div><p class="text-muted small mb-2">Riwayat Selesai</p><h3 class="fw-bold mb-0">{{ $userSelesai }}</h3></div>
+                                    <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-check-circle fs-5"></i></div>
+                                </div>
+                                @if ($userSelesai > 0)
+                                    <small class="text-primary mt-3"><i class="bi bi-check2"></i> Total dikembalikan</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Belum ada riwayat</small>
+                                @endif
+                            </div>
+                        </div>
+                    </section>
+                    @endif
 
                     @if (Auth::user()->role !== 'admin')
                         <section class="mb-4" id="peminjaman-saya">

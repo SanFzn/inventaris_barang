@@ -33,6 +33,26 @@ class PeminjamanController extends Controller
         return view('approvals.index', compact('peminjamans'));
     }
 
+    public function checkPending(Request $request)
+    {
+        $pending = Peminjaman::with(['user', 'barang'])
+            ->where('status_pinjam', 'menunggu')
+            ->latest('id_pinjam')
+            ->get();
+
+        $latest = $pending->first();
+
+        return response()->json([
+            'count' => $pending->count(),
+            'latest' => $latest ? [
+                'id_pinjam' => $latest->id_pinjam,
+                'user_name' => $latest->user->name ?? 'User',
+                'barang_nama' => $latest->barang->nama_barang ?? 'Barang',
+                'tgl' => optional($latest->tgl_pinjam)->diffForHumans() ?? 'Baru saja',
+            ] : null,
+        ]);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([

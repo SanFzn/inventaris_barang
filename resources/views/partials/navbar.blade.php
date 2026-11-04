@@ -6,8 +6,10 @@
        
         <a class="btn btn-light btn-sm bg-white position-relative" href="{{ route('notifications.index') }}" aria-label="Buka pusat notifikasi" title="Pusat notifikasi">
             <i class="bi bi-bell"></i>
-            @if ($notificationUnreadCount > 0)
-                <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" aria-label="{{ $notificationUnreadCount }} notifikasi belum dibaca">{{ $notificationUnreadCount }}</span>
+            @if (($notificationUnreadCount ?? 0) > 0)
+                <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" id="navbar-notif-badge" aria-label="{{ $notificationUnreadCount }} notifikasi belum dibaca">{{ $notificationUnreadCount }}</span>
+            @else
+                <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle d-none" id="navbar-notif-badge">0</span>
             @endif
         </a>
         <button type="button" class="btn p-0 border-0 bg-transparent d-flex align-items-center gap-2"
@@ -33,3 +35,38 @@
 </header>
 
 @include('partials.profile-modal')
+
+@if (Auth::check() && Auth::user()->role === 'admin')
+    <!-- Toast Container for Realtime Admin Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+        <div id="adminLoanToast" class="toast border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-warning text-dark border-0">
+                <i class="bi bi-bell-fill me-2 fs-6"></i>
+                <strong class="me-auto" id="toastLoanTitle">Pengajuan Peminjaman Baru</strong>
+                <small id="toastLoanTime">Baru saja</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body bg-white text-dark rounded-bottom p-3">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <div class="rounded-circle bg-light p-2 text-primary flex-shrink-0">
+                        <i class="bi bi-box-seam fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold" id="toastLoanUser">User</div>
+                        <div class="small text-muted" id="toastLoanItem">mengajukan peminjaman barang</div>
+                    </div>
+                </div>
+                <div class="mt-2 pt-2 border-top d-flex justify-content-end">
+                    <a href="{{ route('approvals.index') }}" class="btn btn-warning btn-sm fw-semibold">
+                        <i class="bi bi-clipboard-check me-1"></i> Tinjau Persetujuan
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.adminCheckPendingUrl = "{{ route('approvals.checkPending') }}";
+        window.initialPendingCount = {{ $pendingApprovalsCount ?? 0 }};
+    </script>
+@endif
