@@ -7,9 +7,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/assets.css') }}">
 </head>
-<body>
-    <div class="container-fluid">
+<body class="container-fluid">
         @include('partials.navbar')
 
         <div class="row">
@@ -18,21 +18,52 @@
             <main class="col-md-9 col-lg-10 px-0">
                 <div class="p-4 p-lg-5">
                     @if (session('success'))
-                        <div class="alert alert-success alert-dismissible fade show" role="alert">
-                            {{ session('success') }}
+                        <div id="loginAlert" class="alert alert-success alert-dismissible fade show d-flex align-items-center gap-2 shadow-sm mb-4" role="alert">
+                            <i class="bi bi-check-circle-fill fs-5"></i>
+                            <div>{{ session('success') }}</div>
+                            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                        </div>
+                    @endif
+                    @if (session('error'))
+                        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                            {{ session('error') }}
                             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
                         </div>
                     @endif
+
+                    @if (Auth::user()->role === 'admin' && ($pendingApprovalsCount ?? 0) > 0)
+                        <div class="alert alert-warning alert-dismissible fade show border-0 shadow-sm d-flex flex-column flex-md-row align-items-md-center justify-content-between p-3 p-md-4 mb-4 rounded-3" role="alert">
+                            <div class="d-flex align-items-center gap-3 mb-3 mb-md-0">
+                                <div class="rounded-circle bg-warning bg-opacity-25 text-dark d-flex align-items-center justify-content-center flex-shrink-0" style="width: 46px; height: 46px;">
+                                    <i class="bi bi-bell-fill fs-5 text-warning"></i>
+                                </div>
+                                <div>
+                                    <h3 class="h6 fw-bold mb-1 text-dark">Pemberitahuan Peminjaman Barang!</h3>
+                                    <p class="mb-0 text-muted small">
+                                        Ada <strong>{{ $pendingApprovalsCount }}</strong> pengajuan peminjaman barang baru dari user yang menunggu persetujuan Anda.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="{{ route('approvals.index') }}" class="btn btn-warning btn-sm text-dark fw-bold px-3 py-2 shadow-sm text-nowrap">
+                                    <i class="bi bi-clipboard-check me-1"></i> Tinjau Pengajuan
+                                </a>
+                                <button type="button" class="btn-close ms-2 position-static" data-bs-dismiss="alert" aria-label="Tutup"></button>
+                            </div>
+                        </div>
+                    @endif
+
                     <section class="welcome-panel rounded-3 p-4 p-lg-4 mb-4">
                         <div class="row align-items-center">
                             <div class="col-lg-8">
-                                <p class="text-white-50 mb-2">Selamat datang kembali</p>
                                 <h2 class="fw-bold mb-2">Halo, {{ Auth::user()->name }}.</h2>
                                 <p class="mb-0 text-white-50">Pantau kondisi dan aktivitas inventaris dari satu tempat.</p>
                             </div>
                         </div>
                     </section>
 
+                    @if (Auth::user()->role === 'admin')
+                    {{-- ===== ADMIN STATS CARDS ===== --}}
                     <section class="row g-4 stats-grid mb-4" id="inventaris">
                         <div class="col-sm-6 col-xl">
                             <div class="card stat-card h-100 p-3">
@@ -40,7 +71,11 @@
                                     <div><p class="text-muted small mb-2">Total Barang</p><h3 class="fw-bold mb-0">{{ $totalBarang }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-box-seam fs-5"></i></div>
                                 </div>
-                                <small class="text-muted mt-3"><i class="bi bi-dash"></i> Belum ada data</small>
+                                @if ($totalBarang > 0)
+                                    <small class="text-primary mt-3"><i class="bi bi-boxes"></i> Keseluruhan aset terdata</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Belum ada data</small>
+                                @endif
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl">
@@ -49,7 +84,11 @@
                                     <div><p class="text-muted small mb-2">Tersedia</p><h3 class="fw-bold mb-0">{{ $barangTersedia }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-check-circle fs-5"></i></div>
                                 </div>
-                                <small class="text-success mt-3"><i class="bi bi-arrow-up"></i> Siap digunakan</small>
+                                @if ($barangTersedia > 0)
+                                    <small class="text-success mt-3"><i class="bi bi-arrow-up"></i> Siap digunakan</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Tidak ada barang tersedia</small>
+                                @endif
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl" id="peminjaman">
@@ -58,7 +97,11 @@
                                     <div><p class="text-muted small mb-2">Dipinjam</p><h3 class="fw-bold mb-0">{{ $barangDipinjam }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-arrow-left-right fs-5"></i></div>
                                 </div>
-                                <small class="text-muted mt-3">Tidak ada peminjaman aktif</small>
+                                @if ($barangDipinjam > 0)
+                                    <small class="text-primary mt-3"><i class="bi bi-arrow-left-right"></i> Sedang dipinjam</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Tidak ada peminjaman aktif</small>
+                                @endif
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl">
@@ -67,7 +110,11 @@
                                     <div><p class="text-muted small mb-2">Perlu Perbaikan</p><h3 class="fw-bold mb-0">{{ $barangRusak }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-tools fs-5"></i></div>
                                 </div>
-                                <small class="text-muted mt-3">Semua kondisi terpantau</small>
+                                @if ($barangRusak > 0)
+                                    <small class="text-warning mt-3"><i class="bi bi-exclamation-triangle"></i> Butuh perbaikan/servis</small>
+                                @else
+                                    <small class="text-success mt-3"><i class="bi bi-check-circle"></i> Semua kondisi terpantau</small>
+                                @endif
                             </div>
                         </div>
                         <div class="col-sm-6 col-xl" id="peminjaman-terlambat">
@@ -76,18 +123,131 @@
                                     <div><p class="text-muted small mb-2">Peminjaman Terlambat</p><h3 class="fw-bold mb-0">{{ $peminjamanTerlambat }}</h3></div>
                                     <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-exclamation-triangle-fill fs-5"></i></div>
                                 </div>
-                                <small class="text-danger mt-3"><i class="bi bi-arrow-up"></i> Perlu tindakan langsung</small>
+                                @if ($peminjamanTerlambat > 0)
+                                    <small class="text-danger mt-3"><i class="bi bi-arrow-up"></i> Perlu tindakan langsung</small>
+                                @else
+                                    <small class="text-success mt-3"><i class="bi bi-check-circle"></i> Tidak ada keterlambatan</small>
+                                @endif
                             </div>
                         </div>
                     </section>
+                    @else
+                    {{-- ===== USER STATS CARDS ===== --}}
+                    <section class="row g-4 stats-grid-4 mb-4" id="inventaris">
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card stat-card h-100 p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div><p class="text-muted small mb-2">Aset Aktif Saya</p><h3 class="fw-bold mb-0">{{ $userAktif }}</h3></div>
+                                    <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-box-seam fs-5"></i></div>
+                                </div>
+                                @if ($userAktif > 0)
+                                    <small class="text-success mt-3"><i class="bi bi-arrow-up"></i> Sedang digunakan</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Belum ada aset dipinjam</small>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card stat-card h-100 p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div><p class="text-muted small mb-2">Menunggu Admin</p><h3 class="fw-bold mb-0">{{ $userMenunggu }}</h3></div>
+                                    <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-hourglass-split fs-5"></i></div>
+                                </div>
+                                @if ($userMenunggu > 0)
+                                    <small class="text-warning mt-3"><i class="bi bi-clock"></i> Menunggu persetujuan</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Tidak ada pengajuan</small>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card stat-card h-100 p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div><p class="text-muted small mb-2">Status Terlambat</p><h3 class="fw-bold mb-0">{{ $userTerlambat }}</h3></div>
+                                    <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-exclamation-triangle-fill fs-5"></i></div>
+                                </div>
+                                @if ($userTerlambat > 0)
+                                    <small class="text-danger mt-3"><i class="bi bi-arrow-up"></i> Perlu segera dikembalikan</small>
+                                @else
+                                    <small class="text-success mt-3"><i class="bi bi-check-circle"></i> Tidak ada keterlambatan</small>
+                                @endif
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xl-3">
+                            <div class="card stat-card h-100 p-3">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div><p class="text-muted small mb-2">Riwayat Selesai</p><h3 class="fw-bold mb-0">{{ $userSelesai }}</h3></div>
+                                    <div class="stat-icon rounded-3 d-flex align-items-center justify-content-center"><i class="bi bi-check-circle fs-5"></i></div>
+                                </div>
+                                @if ($userSelesai > 0)
+                                    <small class="text-primary mt-3"><i class="bi bi-check2"></i> Total dikembalikan</small>
+                                @else
+                                    <small class="text-muted mt-3"><i class="bi bi-dash"></i> Belum ada riwayat</small>
+                                @endif
+                            </div>
+                        </div>
+                    </section>
+                    @endif
+
+                    @if (Auth::user()->role !== 'admin')
+                        <section class="mb-4" id="peminjaman-saya">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h2 class="h5 fw-bold mb-1">Peminjaman Saya</h2>
+                                    <p class="text-muted small mb-0">Tandai barang setelah diserahkan kembali.</p>
+                                </div>
+                            </div>
+                            <div class="card content-card">
+                                <div class="card-body p-0">
+                                    @forelse ($peminjamanAktif as $peminjaman)
+                                        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 border-bottom p-3 p-md-4">
+                                            <div>
+                                                <div class="fw-semibold">{{ $peminjaman->barang->nama_barang ?? 'Barang tidak ditemukan' }}</div>
+                                                <small class="text-muted">
+                                                    {{ $peminjaman->barang->kode_barang ?? '-' }}
+                                                    @if ($peminjaman->tgl_kembali)
+                                                        · Rencana kembali {{ $peminjaman->tgl_kembali->format('d M Y, H:i') }}
+                                                    @endif
+                                                </small>
+                                            </div>
+                                            <form method="POST" action="{{ route('loans.return', $peminjaman->id_pinjam) }}" id="returnForm-{{ $peminjaman->id_pinjam }}">
+                                                @csrf
+                                                <button type="button" class="btn btn-sm btn-outline-success text-nowrap btn-confirm-return"
+                                                    data-form-id="returnForm-{{ $peminjaman->id_pinjam }}"
+                                                    data-barang-name="{{ $peminjaman->barang->nama_barang ?? 'Barang' }}">
+                                                    <i class="bi bi-box-arrow-in-down me-1"></i>Tandai Dikembalikan
+                                                </button>
+                                            </form>
+                                        </div>
+                                    @empty
+                                        <div class="text-center py-4 text-muted">Tidak ada barang yang sedang Anda pinjam.</div>
+                                    @endforelse
+                                </div>
+                            </div>
+                        </section>
+                    @endif
 
                     <section class="row g-4" id="laporan">
                         <div class="col-lg-8">
                             <div class="card content-card h-100">
                                 <div class="card-body p-4">
-                                    <div class="d-flex justify-content-between align-items-center mb-4">
-                                        <div><h2 class="h5 fw-bold mb-1">Aset Terbaru</h2></div>
-                                        <a class="btn btn-sm btn-outline-primary" href="{{ route('assets.index') }}">Lihat semua</a>
+                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+                                        <div>
+                                            <h2 class="h5 fw-bold mb-1">Aset Terbaru</h2>
+                                            <p class="text-muted small mb-0">Pantau aset yang baru ditambahkan.</p>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-center gap-1 m-0">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+                                                    <input type="search" name="q" class="form-control bg-light border-start-0" placeholder="Cari aset..." value="{{ request('q') }}" style="min-width: 160px; max-width: 220px;">
+                                                </div>
+                                                @if(request()->filled('q'))
+                                                    <a href="{{ route('dashboard') }}" class="btn btn-sm btn-light" title="Reset pencarian"><i class="bi bi-x-lg"></i></a>
+                                                @endif
+                                            </form>
+                                            <a class="btn btn-sm btn-outline-primary text-nowrap" href="{{ route('assets.index') }}">Lihat semua</a>
+                                        </div>
                                     </div>
                                     @forelse($barangTerbaru as $barang)
                                         <div class="d-flex justify-content-between align-items-center border-bottom py-3">
@@ -115,17 +275,24 @@
                                         @if (Auth::user()->role === 'admin')
                                             <a class="quick-action" href="#newAssetModal" data-bs-toggle="modal">
                                                 <i class="bi bi-plus-circle"></i>
-                                                <span class="small fw-semibold text-center">Tambah Aset</span>
+                                                <span class="small fw-semibold text-center">Tambah Aset</span>  
                                             </a>
                                         @endif
                                         <a class="quick-action" href="#scanQrModal" data-bs-toggle="modal">
                                             <i class="bi bi-qr-code-scan"></i>
                                             <span class="small fw-semibold text-center">Pindai QR</span>
                                         </a>
-                                        <a class="quick-action" href="{{ route('qr.labels') }}">
-                                            <i class="bi bi-printer"></i>
-                                            <span class="small fw-semibold text-center">Cetak Label QR</span>
-                                        </a>
+                                        @if (Auth::user()->role === 'admin')
+                                            <a class="quick-action" href="{{ route('qr.labels') }}">
+                                                <i class="bi bi-printer"></i>
+                                                <span class="small fw-semibold text-center">Cetak Label QR</span>
+                                            </a>
+                                        @else
+                                            <a class="quick-action" href="#borrowAssetModal" data-bs-toggle="modal">
+                                                <i class="bi bi-box-arrow-up-right"></i>
+                                                <span class="small fw-semibold text-center">Pinjam Barang</span>
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -134,7 +301,6 @@
                 </div>
             </main>
         </div>
-    </div>
 
     <div class="modal fade" id="borrowAssetModal" tabindex="-1" aria-labelledby="borrowAssetModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -163,7 +329,7 @@
                         </div>
                         <div>
                             <label for="borrowNote" class="form-label">Keterangan</label>
-                            <textarea id="borrowNote" name="keterangan" class="form-control" rows="3" placeholder="Keperluan peminjaman"></textarea>
+                            <textarea id="borrowNote" name="keterangan" class="form-control" rows="3" placeholder="Keperluan peminjaman" required></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -175,14 +341,33 @@
         </div>
     </div>
 
-    <div class="modal fade" id="scanQrModal" tabindex="-1" aria-labelledby="scanQrModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    {{-- Modal Konfirmasi Pengembalian --}}
+    <div class="modal fade" id="confirmReturnModal" tabindex="-1" aria-labelledby="confirmReturnModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="confirmReturnModalLabel"><i class="bi bi-box-arrow-in-down me-2 text-success"></i>Konfirmasi</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Tandai barang <strong id="confirmReturnItemName"></strong> sudah dikembalikan?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-success" id="confirmReturnBtn"><i class="bi bi-check-lg me-1"></i>Ya, Kembalikan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="scanQrModal" tabindex="-1" aria-labelledby="scanQrModalLabel" aria-hidden="true" data-generate-url="{{ route('qr.generate', ':code') }}">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 440px;">
             <div class="modal-content border-0 shadow">
                 <div class="modal-header">
                     <h2 class="modal-title h5 fw-bold" id="scanQrModalLabel"><i class="bi bi-qr-code-scan me-2 text-primary"></i>Pindai dan Lacak QR</h2>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                 </div>
-                <div class="modal-body text-center py-5">
+                <div class="modal-body text-center p-4">
                     <div id="dashboard-qr-reader"></div>
                     <div id="dashboard-scan-status" class="alert alert-secondary d-none mt-3" role="status"></div>
                     <div id="dashboard-scan-result" class="alert alert-success d-none mt-3" role="alert"></div>
@@ -206,15 +391,18 @@
                 <form action="{{ route('assets.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="assetName" class="form-label">Nama Aset</label>
-                            <input type="text" class="form-control" id="assetName" name="nama_barang" placeholder="Contoh: Laptop Lenovo">
-                        </div>
-                        <div class="mb-3">
-                            <label for="assetCode" class="form-label">Kode Aset</label>
-                            <input type="text" class="form-control" id="assetCode" name="kode_barang" placeholder="Contoh: AST-001">
-                        </div>
                         <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label for="kode_barang" class="form-label">Kode aset</label>
+                                <input id="kode_barang" name="kode_barang" class="form-control" value="{{ old('kode_barang') }}" readonly required>
+                                <div class="form-text">
+                                    Kode dibuat otomatis dari nama aset.
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="nama_barang" class="form-label">Nama aset</label>
+                                <input id="nama_barang" name="nama_barang" class="form-control" value="{{ old('nama_barang') }}" required>
+                            </div>
                             <div class="col-md-6">
                                 <label for="assetCategory" class="form-label">Kategori</label>
                                 <select class="form-select" id="assetCategory" name="id_kategori" required>
@@ -233,10 +421,26 @@
                                     @endforeach
                                 </select>
                             </div>
+                            <div class="col-md-6">
+                                <label for="tgl_pembelian" class="form-label">Tanggal pembelian</label>
+                                <input id="tgl_pembelian" name="tgl_pembelian" type="date" class="form-control" value="{{ old('tgl_pembelian') }}" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="harga" class="form-label">Harga</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">Rp</span>
+                                    <input id="harga" type="text" class="form-control harga-input" value="{{ old('harga') ? number_format(old('harga'), 0, ',', '.') : '' }}" placeholder="Masukkan harga" required>
+                                    <input type="hidden" name="harga" class="harga-raw-input" value="{{ old('harga', 0) }}">
+                                </div>
+                            </div>
                         </div>
                         <div>
-                            <label for="assetDescription" class="form-label">Deskripsi</label>
-                            <textarea class="form-control" id="assetDescription" name="spesifikasi" rows="3"></textarea>
+                            <label for="assetDescription" class="form-label fw-semibold">Deskripsi / Spesifikasi <span class="text-danger">*</span></label>
+                            <textarea class="form-control asset-desc-input" id="assetDescription" name="spesifikasi" rows="4" placeholder="Tuliskan deskripsi lengkap atau spesifikasi barang minimal 10 kata..." required></textarea>
+                            <div class="form-text d-flex justify-content-between align-items-center mt-1">
+                                <span class="text-muted small">Wajib mendeskripsikan barang minimal 10 kata.</span>
+                                <span class="word-counter text-danger small fw-semibold">0 / 10 kata</span>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -250,72 +454,24 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="{{ asset('js/navbar.js') }}"></script>
+    <script src="{{ asset('js/assets.js') }}"></script>
+    <script src="{{ asset('js/dashboard.js') }}"></script>
+
     <script>
-        const dashboardReader = new Html5Qrcode('dashboard-qr-reader');
-        const dashboardStatus = document.getElementById('dashboard-scan-status');
-        const dashboardResult = document.getElementById('dashboard-scan-result');
-        const dashboardCameraButton = document.getElementById('dashboard-camera-button');
-        const dashboardPhotoButton = document.getElementById('dashboard-photo-button');
-        const dashboardPhotoInput = document.getElementById('dashboard-photo-input');
-        let dashboardCameraRunning = false;
-
-        function setDashboardStatus(message, type = 'secondary') {
-            dashboardStatus.className = `alert alert-${type} mt-3`;
-            dashboardStatus.textContent = message;
-        }
-
-        function setDashboardResult(decodedText) {
-            dashboardResult.className = 'alert alert-success mt-3';
-            dashboardResult.innerHTML = '<strong>QR terbaca:</strong> <span></span>';
-            dashboardResult.querySelector('span').textContent = decodedText;
-        }
-
-        function handleDashboardScan(decodedText) {
-            if (dashboardCameraRunning) {
-                dashboardReader.stop().catch(() => {});
-                dashboardCameraRunning = false;
-                dashboardCameraButton.innerHTML = '<i class="bi bi-camera me-1"></i>Buka Kamera';
-            }
-            setDashboardResult(decodedText);
-            setDashboardStatus('Pemindaian selesai.', 'success');
-        }
-
-        dashboardCameraButton.addEventListener('click', async () => {
-            if (dashboardCameraRunning) return;
-            setDashboardStatus('Meminta izin kamera...', 'info');
-            try {
-                await dashboardReader.start(
-                    { facingMode: 'environment' },
-                    { fps: 10, qrbox: { width: 220, height: 220 } },
-                    handleDashboardScan,
-                    () => {}
-                );
-                dashboardCameraRunning = true;
-                dashboardCameraButton.innerHTML = '<i class="bi bi-camera-fill me-1"></i>Kamera Aktif';
-                setDashboardStatus('Arahkan kamera ke kode QR.', 'info');
-            } catch (error) {
-                setDashboardStatus('Kamera tidak dapat dibuka. Gunakan Foto atau periksa izin browser.', 'danger');
-            }
+        // Confirm return modal handler
+        let returnFormId = null;
+        document.querySelectorAll('.btn-confirm-return').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                returnFormId = this.getAttribute('data-form-id');
+                document.getElementById('confirmReturnItemName').textContent = this.getAttribute('data-barang-name');
+                var modal = new bootstrap.Modal(document.getElementById('confirmReturnModal'));
+                modal.show();
+            });
         });
-
-        dashboardPhotoButton.addEventListener('click', () => dashboardPhotoInput.click());
-        dashboardPhotoInput.addEventListener('change', async (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            setDashboardStatus('Membaca QR dari foto...', 'info');
-            try {
-                setDashboardResult(await dashboardReader.scanFile(file, true));
-                setDashboardStatus('Pemindaian selesai.', 'success');
-            } catch (error) {
-                setDashboardStatus('Kode QR tidak ditemukan pada foto.', 'warning');
-            }
-            dashboardPhotoInput.value = '';
-        });
-
-        document.getElementById('scanQrModal').addEventListener('hidden.bs.modal', () => {
-            if (dashboardCameraRunning) {
-                dashboardReader.stop().catch(() => {});
-                dashboardCameraRunning = false;
+        document.getElementById('confirmReturnBtn').addEventListener('click', function() {
+            if (returnFormId) {
+                document.getElementById(returnFormId).submit();
             }
         });
     </script>

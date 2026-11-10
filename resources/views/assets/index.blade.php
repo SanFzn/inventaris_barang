@@ -1,225 +1,163 @@
-<html lang="id">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kelola Aset | Inventaris Barang</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link href="{{ asset('css/assets.css') }}" rel="stylesheet">
-</head>
-<body class="bg-light">
-    <main class="container py-4 py-lg-5">
-    @include('assets.partials.header')
-    @include('assets.partials.flash-messages')
-    @include('assets.partials.table')
-    </main>
-
-    @include('assets.partials.create-modal')
-    @include('assets.partials.edit-modals')
-    @include('assets.partials.delete-modal')
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ asset('js/assets.js') }}"></script>
-</body>
-</html>
 <!doctype html>
 <html lang="id">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Kelola Aset | Inventaris Barang</title>
+    <title>{{ Auth::user()->role === 'admin' ? 'Kelola Aset' : 'Daftar Aset' }} | Inventaris Barang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css" rel="stylesheet">
-    <style>
-        .delete-modal-icon {
-            width: 64px;
-            height: 64px;
-            display: grid;
-            place-items: center;
-            margin: 0 auto 1rem;
-            border-radius: 50%;
-            color: #dc3545;
-            background: #fff0f1;
-            font-size: 1.75rem;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ asset('css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/assets.css') }}">
 </head>
-<body class="bg-light">
-    <main class="container py-4 py-lg-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <div>
-                <a href="{{ route('dashboard') }}" class="text-decoration-none">&larr; Dashboard</a>
-                <h1 class="h3 fw-bold mt-3 mb-1">Kelola Aset</h1>
-                <p class="text-muted mb-0">Daftar dan kondisi aset inventaris.</p>
+<body class="container-fluid">
+    @include('partials.navbar')
+
+    <div class="row">
+        @include('partials.sidebar')
+
+        <main class="col-md-9 col-lg-10 px-0">
+            <div class="p-4 p-lg-5">
+                @include('assets.partials.header')
+                @include('assets.partials.flash-messages')
+                @include('assets.partials.card')
             </div>
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAssetModal">
-                <i class="bi bi-plus-lg me-1"></i>Tambah Aset
-            </button>
-        </div>
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if ($errors->any())
-            <div class="alert alert-danger">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-            </div>
-        @endif
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-0">
-                @if ($barangs->isEmpty())
-                    <div class="text-center py-5">
-                        <h2 class="h5">Belum ada aset</h2>
-                        <p class="text-muted mb-0">Data aset akan tampil di halaman ini setelah ditambahkan.</p>
+        </main>
+    </div>
+
+    @if (Auth::user()->role === 'admin')
+        @include('assets.partials.create-modal')
+        @include('assets.partials.edit-modals')
+        @include('assets.partials.delete-modal')
+    @else
+        <div class="modal fade" id="detailAssetModal" tabindex="-1" aria-labelledby="detailAssetModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header">
+                        <h2 class="modal-title h5 fw-bold" id="detailAssetModalLabel"><i class="bi bi-info-circle me-2 text-info"></i>Detail Barang</h2>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                     </div>
-                @else
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead>
-                                <tr><th class="px-4">Kode</th><th>Nama Aset</th><th>Kategori</th><th>Lokasi</th><th>Status</th><th>Aksi</th></tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($barangs as $barang)
-                                    <tr>
-                                        <td class="px-4 fw-semibold">{{ $barang->kode_barang }}</td>
-                                        <td>{{ $barang->nama_barang }}</td>
-                                        <td>{{ $barang->kategori->nama_kategori ?? '-' }}</td>
-                                        <td>{{ $barang->lokasi->nama_lokasi ?? '-' }}</td>
-                                        <td><span class="badge bg-success">{{ ucfirst($barang->status) }}</span></td>
-                                        <td>
-                                            <div class="d-flex gap-2">
-                                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editAsset{{ $barang->id_barang }}"><i class="bi bi-pencil"></i></button>
-                                                <a href="{{ route('qr.labels', ['nama_barang' => $barang->nama_barang, 'kode_barang' => $barang->kode_barang]) }}" class="btn btn-sm btn-outline-secondary" title="Cetak label QR"><i class="bi bi-printer"></i></a>
-                                                <form method="POST" action="{{ route('assets.destroy', $barang) }}" class="d-inline delete-asset-form" data-asset-name="{{ $barang->nama_barang }}">
-                                                    @csrf @method('DELETE')
-                                                    <button class="btn btn-sm btn-outline-danger" type="submit"><i class="bi bi-trash"></i></button>
-                                                </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
-                @endif
-            </div>
-        </div>
-    </main>
-    <div class="modal fade" id="addAssetModal" tabindex="-1" aria-labelledby="addAssetModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title h5" id="addAssetModalLabel"><i class="bi bi-box-seam me-2 text-primary"></i>Tambah Aset</h2>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-                </div>
-                <form method="POST" action="{{ route('assets.store') }}">
-                    @csrf
                     <div class="modal-body">
-                        <div class="row g-3">
-                            <div class="col-md-6"><label for="kode_barang" class="form-label">Kode aset</label><input id="kode_barang" name="kode_barang" class="form-control" value="{{ old('kode_barang') }}" required></div>
-                            <div class="col-md-6"><label for="nama_barang" class="form-label">Nama aset</label><input id="nama_barang" name="nama_barang" class="form-control" value="{{ old('nama_barang') }}" required></div>
-                            <div class="col-md-6"><label for="id_kategori" class="form-label">Kategori</label><select id="id_kategori" name="id_kategori" class="form-select" required><option value="">Pilih kategori</option>@foreach ($kategoris as $kategori)<option value="{{ $kategori->id_kategori }}" {{ old('id_kategori') == $kategori->id_kategori ? 'selected' : '' }}>{{ $kategori->nama_kategori }}</option>@endforeach</select></div>
-                            <div class="col-md-6"><label for="id_lokasi" class="form-label">Lokasi</label><select id="id_lokasi" name="id_lokasi" class="form-select" required><option value="">Pilih lokasi</option>@foreach ($lokasis as $lokasi)<option value="{{ $lokasi->id_lokasi }}" {{ old('id_lokasi') == $lokasi->id_lokasi ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>@endforeach</select></div>
-                            <div class="col-md-12"><label for="tgl_pembelian" class="form-label">Tanggal pembelian</label><input id="tgl_pembelian" name="tgl_pembelian" type="date" class="form-control" value="{{ old('tgl_pembelian') }}"></div>
-                            <div class="col-12"><label for="spesifikasi" class="form-label">Spesifikasi</label><textarea id="spesifikasi" name="spesifikasi" class="form-control" rows="3">{{ old('spesifikasi') }}</textarea></div>
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-5 text-center">
+                                <img id="detailAssetImage" src="" alt="QR Barang" class="img-fluid rounded-3 border shadow-sm bg-light" style="max-height: 240px; object-fit: contain;">
+                            </div>
+                            <div class="col-md-7">
+                                <div class="mb-2">
+                                    <span id="detailAssetStatus" class="badge bg-success px-2 py-1"></span>
+                                </div>
+                                <h3 id="detailAssetName" class="h4 fw-bold mb-2"></h3>
+                                <p id="detailAssetCode" class="text-muted mb-3"></p>
+
+                                <div class="small text-muted">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-tag text-primary"></i>
+                                        <span id="detailAssetCategory"></span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-geo-alt text-danger"></i>
+                                        <span id="detailAssetLocation"></span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-calendar3 text-success"></i>
+                                        <span id="detailAssetTanggal"></span>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <i class="bi bi-currency-dollar text-warning"></i>
+                                        <span id="detailAssetPrice"></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Spesifikasi</label>
+                                <p id="detailAssetSpec" class="mb-0 text-secondary"></p>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Simpan Aset</button>
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
-    </div>
-    @foreach ($barangs as $barang)
-        <div class="modal fade" id="editAsset{{ $barang->id_barang }}" tabindex="-1" aria-labelledby="editAssetLabel{{ $barang->id_barang }}" aria-hidden="true">
-            <div class="modal-dialog modal-lg modal-dialog-centered">
-                <div class="modal-content">
+
+        {{-- Modal Pinjam Barang untuk User --}}
+        <div class="modal fade" id="borrowAssetModal" tabindex="-1" aria-labelledby="borrowAssetModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
                     <div class="modal-header">
-                        <h2 class="modal-title h5" id="editAssetLabel{{ $barang->id_barang }}"><i class="bi bi-pencil me-2 text-primary"></i>Edit Aset</h2>
+                        <h2 class="modal-title h5 fw-bold" id="borrowAssetModalLabel"><i class="bi bi-box-arrow-up-right me-2 text-primary"></i>Pinjam Barang</h2>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                     </div>
-                    <form method="POST" action="{{ route('assets.update', $barang) }}">
-                        @csrf @method('PUT')
+                    <form method="POST" action="{{ route('loans.store') }}">
+                        @csrf
                         <div class="modal-body">
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Kode aset</label>
-                                    <input name="kode_barang" class="form-control" value="{{ $barang->kode_barang }}" readonly required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Nama aset</label>
-                                    <input name="nama_barang" class="form-control" value="{{ $barang->nama_barang }}" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Kategori</label>
-                                    <select name="id_kategori" class="form-select" required>
-                                        @foreach ($kategoris as $kategori)
-                                            <option value="{{ $kategori->id_kategori }}" {{ $barang->id_kategori == $kategori->id_kategori ? 'selected' : '' }}>{{ $kategori->nama_kategori }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Lokasi</label>
-                                    <select name="id_lokasi" class="form-select" required>
-                                        @foreach ($lokasis as $lokasi)
-                                            <option value="{{ $lokasi->id_lokasi }}" {{ $barang->id_lokasi == $lokasi->id_lokasi ? 'selected' : '' }}>{{ $lokasi->nama_lokasi }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-12">
-                                    <label class="form-label">Tanggal pembelian</label>
-                                    <input name="tgl_pembelian" type="date" class="form-control" value="{{ optional($barang->tgl_pembelian)->format('Y-m-d') }}">
-                                </div>
-                                <div class="col-12"><label class="form-label">Spesifikasi</label><textarea name="spesifikasi" class="form-control" rows="3">{{ $barang->spesifikasi }}</textarea></div>
+                            <div class="mb-3">
+                                <label class="form-label">Barang</label>
+                                <input type="text" id="borrowAssetName" class="form-control bg-light" readonly>
+                                <input type="hidden" name="id_barang" id="borrowAssetId">
+                            </div>
+                            <div class="mb-3">
+                                <label for="borrowReturnDate" class="form-label">Rencana tanggal kembali</label>
+                                <input id="borrowReturnDate" name="tgl_kembali" type="datetime-local" class="form-control" required>
+                            </div>
+                            <div>
+                                <label for="borrowNote" class="form-label">Keterangan</label>
+                                <textarea id="borrowNote" name="keterangan" class="form-control" rows="3" placeholder="Keperluan peminjaman" required></textarea>
                             </div>
                         </div>
-                        <div class="modal-footer"><button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button><button type="submit" class="btn btn-primary"><i class="bi bi-check-lg me-1"></i>Simpan Perubahan</button></div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-send me-1"></i>Kirim Pengajuan</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
-    @endforeach
-    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-body text-center p-4">
-                    <div class="delete-modal-icon"><i class="bi bi-trash3"></i></div>
-                    <h2 class="h5 fw-bold mb-2" id="deleteConfirmModalLabel">Hapus aset?</h2>
-                    <p class="text-muted mb-4">Aset <strong id="deleteAssetName"></strong> akan dihapus secara permanen.</p>
-                    <div class="d-flex gap-2 justify-content-center">
-                        <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
-                        <button type="button" class="btn btn-danger px-4" id="confirmDeleteButton"><i class="bi bi-trash3 me-1"></i>Hapus</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    @endif
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <script src="{{ asset('js/navbar.js') }}"></script>
+    <script src="{{ asset('js/assets.js') }}"></script>
+    <script src="{{ asset('js/dashboard.js') }}"></script>
+    @if (Auth::user()->role !== 'admin')
     <script>
-        const deleteModalElement = document.getElementById('deleteConfirmModal');
-        const deleteModal = new bootstrap.Modal(deleteModalElement);
-        const deleteAssetName = document.getElementById('deleteAssetName');
-        const confirmDeleteButton = document.getElementById('confirmDeleteButton');
-        let pendingDeleteForm;
+        const borrowModal = document.getElementById('borrowAssetModal');
+        const detailModal = document.getElementById('detailAssetModal');
 
-        document.querySelectorAll('.delete-asset-form').forEach((form) => {
-            form.addEventListener('submit', (event) => {
-                event.preventDefault();
-                pendingDeleteForm = form;
-                deleteAssetName.textContent = form.dataset.assetName;
-                deleteModal.show();
+        if (borrowModal) {
+            borrowModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                document.getElementById('borrowAssetId').value = button.getAttribute('data-barang-id');
+                document.getElementById('borrowAssetName').value =
+                    button.getAttribute('data-barang-kode') + ' - ' + button.getAttribute('data-barang-name');
             });
-        });
+        }
 
-        confirmDeleteButton.addEventListener('click', () => {
-            if (pendingDeleteForm) {
-                pendingDeleteForm.submit();
-            }
-        });
+        if (detailModal) {
+            detailModal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const status = button.getAttribute('data-barang-status');
+                const statusBadge = document.getElementById('detailAssetStatus');
+
+                statusBadge.textContent = status === 'tersedia' ? 'Tersedia' : status === 'dipinjam' ? 'Dipinjam' : 'Tidak Tersedia';
+                statusBadge.className = status === 'tersedia'
+                    ? 'badge bg-success px-2 py-1'
+                    : status === 'dipinjam'
+                        ? 'badge bg-warning text-dark px-2 py-1'
+                        : 'badge bg-secondary px-2 py-1';
+
+                document.getElementById('detailAssetName').textContent = button.getAttribute('data-barang-name');
+                document.getElementById('detailAssetCode').textContent = button.getAttribute('data-barang-kode');
+                document.getElementById('detailAssetCategory').textContent = button.getAttribute('data-barang-kategori');
+                document.getElementById('detailAssetLocation').textContent = button.getAttribute('data-barang-lokasi');
+                document.getElementById('detailAssetTanggal').textContent = button.getAttribute('data-barang-tgl');
+                document.getElementById('detailAssetPrice').textContent = button.getAttribute('data-barang-harga');
+                document.getElementById('detailAssetSpec').textContent = button.getAttribute('data-barang-spec') || 'Tidak ada spesifikasi.';
+                document.getElementById('detailAssetImage').src = button.getAttribute('data-barang-image');
+            });
+        }
     </script>
+    @endif
 </body>
 </html>

@@ -6,26 +6,7 @@
     <title>Login | Inventaris Barang</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <style>
-        .logout-toast {
-            position: fixed;
-            right: 1.5rem;
-            bottom: 1.5rem;
-            z-index: 1080;
-            max-width: min(380px, calc(100vw - 2rem));
-            border-left: 4px solid #198754;
-            animation: toast-in .3s ease-out;
-        }
-
-        @keyframes toast-in {
-            from { opacity: 0; transform: translateY(1rem); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @media (max-width: 575.98px) {
-            .logout-toast { right: 1rem; bottom: 1rem; left: 1rem; max-width: none; }
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/auth.css') }}">
 </head>
 <body class="bg-light">
     @if(session('success'))
@@ -54,7 +35,7 @@
                         <div class="input-group">
                             <input id="password" type="password" name="password" class="form-control" required>
                             <button type="button" class="btn btn-outline-secondary" id="togglePassword" aria-label="Tampilkan password" aria-pressed="false">
-                                <i class="bi bi-eye" aria-hidden="true"></i>
+                                <i class="bi bi-eye" id="toggleIcon" aria-hidden="true"></i>
                             </button>
                         </div>
                     </div>
@@ -65,18 +46,37 @@
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        const passwordInput = document.getElementById('password');
-        const togglePasswordButton = document.getElementById('togglePassword');
+        document.addEventListener('DOMContentLoaded', function () {
+            const passwordInput = document.getElementById('password');
+            const togglePasswordButton = document.getElementById('togglePassword');
+            const toggleIcon = document.getElementById('toggleIcon');
 
-        togglePasswordButton.addEventListener('click', () => {
-            const isPasswordVisible = passwordInput.type === 'text';
-            passwordInput.type = isPasswordVisible ? 'password' : 'text';
-            togglePasswordButton.setAttribute('aria-pressed', String(!isPasswordVisible));
-            togglePasswordButton.setAttribute(
-                'aria-label',
-                isPasswordVisible ? 'Tampilkan password' : 'Sembunyikan password'
-            );
-            togglePasswordButton.querySelector('i').className = isPasswordVisible ? 'bi bi-eye' : 'bi bi-eye-slash';
+            if (!passwordInput || !togglePasswordButton) return;
+
+            togglePasswordButton.addEventListener('click', () => {
+                const isPasswordVisible = passwordInput.type === 'text';
+                passwordInput.type = isPasswordVisible ? 'password' : 'text';
+                togglePasswordButton.setAttribute('aria-pressed', String(!isPasswordVisible));
+                togglePasswordButton.setAttribute(
+                    'aria-label',
+                    isPasswordVisible ? 'Tampilkan password' : 'Sembunyikan password'
+                );
+                if (toggleIcon) {
+                    toggleIcon.className = isPasswordVisible ? 'bi bi-eye' : 'bi bi-eye-slash';
+                }
+            });
+
+            const logoutToast = document.querySelector('.logout-toast');
+            if (logoutToast) {
+                setTimeout(() => {
+                    logoutToast.classList.remove('show');
+                    setTimeout(() => {
+                        if (logoutToast.parentNode) {
+                            logoutToast.parentNode.removeChild(logoutToast);
+                        }
+                    }, 300);
+                }, 3500);
+            }
         });
     </script>
 </body>

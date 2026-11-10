@@ -1,75 +1,72 @@
 <header class="topbar border-bottom px-4 py-3 d-flex align-items-center justify-content-between">
-    <div class="navbar-left d-flex align-items-center gap-4">
-        <i class="bi bi-box-seam fs-5"></i>
-        <h1 class="h5 mb-0 fw-bold">Inventaris Barang</h1>
-        <form method="GET" action="{{ route('dashboard') }}" class="navbar-search">
-            <div class="input-group input-group-sm">
-                <span class="input-group-text bg-light border-end-0"><i class="bi bi-search"></i></span>
-                <input type="search" name="q" class="form-control bg-light border-start-0" placeholder="Cari aset..." aria-label="Cari aset" value="{{ request('q') }}">
-            </div>
-        </form>
+    <div class="navbar-left d-flex align-items-center gap-3">
+        <a href="{{ route('dashboard') }}" class="navbar-brand fw-bold mb-0"><i class="bi bi-box-seam fs-5 text-primary"></i>Inventaris Barang</a>
     </div>
     <div class="d-flex align-items-center gap-2 gap-lg-3 flex-wrap justify-content-end">
-        <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#scanQrModal">
-            <i class="bi bi-qr-code-scan me-1"></i> <span class="d-none d-lg-inline">Pindai QR</span>
-        </button>
-        @if (Auth::user()->role === 'admin')
-            <button class="btn btn-outline-primary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#newAssetModal">
-                <i class="bi bi-plus-lg me-1"></i> <span class="d-none d-lg-inline">Aset Baru</span>
-            </button>
-        @endif
+       
         <a class="btn btn-light btn-sm bg-white position-relative" href="{{ route('notifications.index') }}" aria-label="Buka pusat notifikasi" title="Pusat notifikasi">
             <i class="bi bi-bell"></i>
-            @if (session('notification_count', 0) > 0)
-                <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" aria-label="Ada notifikasi baru"></span>
+            @if (($notificationUnreadCount ?? 0) > 0)
+                <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle" id="navbar-notif-badge" aria-label="{{ $notificationUnreadCount }} notifikasi belum dibaca">{{ $notificationUnreadCount }}</span>
+            @else
+                <span class="badge rounded-pill bg-danger position-absolute top-0 start-100 translate-middle d-none" id="navbar-notif-badge">0</span>
             @endif
         </a>
-        <div class="avatar rounded-circle d-flex align-items-center justify-content-center fw-bold">
-            {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
-        </div>
-        <div class="d-none d-sm-block">
-            <div class="small fw-bold">{{ Auth::user()->name }}</div>
-            <div class="small text-muted text-capitalize">{{ Auth::user()->role }}</div>
-        </div>
-        <form method="POST" action="{{ route('logout') }}" class="ms-2 logout-form">
-            @csrf
-            <button class="btn btn-outline-danger btn-sm" type="submit">
-                <i class="bi bi-box-arrow-right me-1"></i> Logout
-            </button>
-        </form>
+        <button type="button" class="btn p-0 border-0 bg-transparent d-flex align-items-center gap-2"
+            data-bs-toggle="modal" data-bs-target="#profileModal"
+            title="Lihat profil akun" aria-label="Buka profil akun">
+            @if (Auth::user()->foto_profil)
+                <img src="{{ Auth::user()->profilPhotoUrl() }}"
+                    alt="Foto profil"
+                    class="rounded-circle object-fit-cover"
+                    style="width: 36px; height: 36px; object-fit: cover; border: 2px solid #e5e7eb;">
+            @else
+                <div class="avatar rounded-circle d-flex align-items-center justify-content-center fw-bold">
+                    {{ strtoupper(substr(Auth::user()->name, 0, 1)) }}
+                </div>
+            @endif
+            <div class="d-none d-sm-block text-start">
+                <div class="small fw-bold">{{ Auth::user()->name }}</div>
+                <div class="small text-muted text-capitalize">{{ Auth::user()->role }}</div>
+            </div>
+            <i class="bi bi-chevron-down small text-muted d-none d-sm-inline"></i>
+        </button>
     </div>
 </header>
-<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-body text-center p-4">
-                <div class="rounded-circle bg-light text-danger d-inline-flex align-items-center justify-content-center mb-3" style="width: 64px; height: 64px; font-size: 1.75rem;">
-                    <i class="bi bi-box-arrow-right"></i>
+
+@include('partials.profile-modal')
+
+@if (Auth::check() && Auth::user()->role === 'admin')
+    <!-- Toast Container for Realtime Admin Notifications -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1090;">
+        <div id="adminLoanToast" class="toast border-0 shadow-lg" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header bg-warning text-dark border-0">
+                <i class="bi bi-bell-fill me-2 fs-6"></i>
+                <strong class="me-auto" id="toastLoanTitle">Pengajuan Peminjaman Baru</strong>
+                <small id="toastLoanTime">Baru saja</small>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+            <div class="toast-body bg-white text-dark rounded-bottom p-3">
+                <div class="d-flex align-items-start gap-2 mb-2">
+                    <div class="rounded-circle bg-light p-2 text-primary flex-shrink-0">
+                        <i class="bi bi-box-seam fs-5"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold" id="toastLoanUser">User</div>
+                        <div class="small text-muted" id="toastLoanItem">mengajukan peminjaman barang</div>
+                    </div>
                 </div>
-                <h2 class="h5 fw-bold mb-2" id="logoutConfirmModalLabel">Keluar dari aplikasi?</h2>
-                <div class="d-flex gap-2 justify-content-center">
-                    <button type="button" class="btn btn-light px-4" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-danger px-4" id="confirmLogoutButton"><i class="bi bi-box-arrow-right me-1"></i>Logout</button>
+                <div class="mt-2 pt-2 border-top d-flex justify-content-end">
+                    <a href="{{ route('approvals.index') }}" class="btn btn-warning btn-sm fw-semibold">
+                        <i class="bi bi-clipboard-check me-1"></i> Tinjau Persetujuan
+                    </a>
                 </div>
             </div>
         </div>
     </div>
-</div>
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const logoutForm = document.querySelector('.logout-form');
-        const logoutModalElement = document.getElementById('logoutConfirmModal');
-        const confirmLogoutButton = document.getElementById('confirmLogoutButton');
 
-        if (!logoutForm || !logoutModalElement || !confirmLogoutButton) {
-            return;
-        }
-
-        const logoutModal = new bootstrap.Modal(logoutModalElement);
-        logoutForm.addEventListener('submit', (event) => {
-            event.preventDefault();
-            logoutModal.show();
-        });
-        confirmLogoutButton.addEventListener('click', () => logoutForm.submit());
-    });
-</script>
+    <script>
+        window.adminCheckPendingUrl = "{{ route('approvals.checkPending') }}";
+        window.initialPendingCount = {{ $pendingApprovalsCount ?? 0 }};
+    </script>
+@endif

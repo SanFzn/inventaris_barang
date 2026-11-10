@@ -7,8 +7,9 @@ use App\Http\Requests\UpdateBarangRequest;
 use App\Models\Barang;
 use App\Models\Kategori;
 use App\Models\Lokasi;
-use Illuminate\Support\Facades\Storage;
 use App\Services\QrCodeService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class BarangController extends Controller
 {
@@ -16,7 +17,7 @@ class BarangController extends Controller
     {
     }
 
-    public function index(\Illuminate\Http\Request $request)
+    public function index(Request $request)
     {
         $query = Barang::with(['kategori', 'lokasi'])->latest('id_barang');
 
@@ -32,7 +33,11 @@ class BarangController extends Controller
             $query->where('status', $request->input('status'));
         }
 
-        $barangs = $query->paginate(15);
+        if ($request->filled('id_kategori')) {
+            $query->where('id_kategori', $request->input('id_kategori'));
+        }
+
+        $barangs = $query->paginate(12);
         if ($request->expectsJson()) {
             return response()->json($barangs);
         }
@@ -42,6 +47,33 @@ class BarangController extends Controller
             'kategoris' => Kategori::orderBy('nama_kategori')->get(),
             'lokasis' => Lokasi::orderBy('nama_lokasi')->get(),
         ]);
+    }
+
+    public function labels(Request $request)
+    {
+        $query = Barang::with(['kategori', 'lokasi'])->orderBy('nama_barang')->orderBy('kode_barang');
+
+        if ($request->filled('kode_barang')) {
+            $query->where('kode_barang', $request->input('kode_barang'));
+        } elseif ($request->filled('q')) {
+            $search = $request->input('q');
+            $query->where(function ($builder) use ($search) {
+                $builder->where('nama_barang', 'like', "%{$search}%")
+                    ->orWhere('kode_barang', 'like', "%{$search}%")
+                    ->orWhereHas('kategori', function ($q) use ($search) {
+                        $q->where('nama_kategori', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('id_kategori')) {
+            $query->where('id_kategori', $request->input('id_kategori'));
+        }
+
+        $barangs = $query->get();
+        $kategoris = Kategori::orderBy('nama_kategori')->get();
+
+        return view('qr.labels', compact('barangs', 'kategoris'));
     }
 
     public function store(StoreBarangRequest $request)
@@ -62,7 +94,6 @@ class BarangController extends Controller
                 return redirect()->route('qr.labels', [
                     'nama_barang' => $barang->nama_barang,
                     'kode_barang' => $barang->kode_barang,
-                    'mode' => 'foto',
                 ])->with('success', 'Aset berhasil ditambahkan.');
             }
 
@@ -101,7 +132,7 @@ class BarangController extends Controller
 
         $barang->update($data);
         if (!$request->expectsJson()) {
-            return redirect()->route('assets.index')->with('success', 'Aset berhasil diperbarui.');
+            return redirect()->route('assets.index')->with('warning', 'Aset berhasil diperbarui.');
         }
 
         return response()->json($barang->load(['kategori', 'lokasi']));
@@ -114,11 +145,14 @@ class BarangController extends Controller
         }
 
         if ($barang->file_qr) {
-            Storage::disk('public')->delete($barang->file_qr);
+            $filePath = public_path($barang->file_qr);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
         }
         $barang->delete();
         if (!request()->expectsJson()) {
-            return redirect()->route('assets.index')->with('success', 'Aset berhasil dihapus.');
+            return redirect()->route('assets.index')->with('danger', 'Aset berhasil dihapus.');
         }
 
         return response()->json(['message' => 'Barang berhasil dihapus.']);

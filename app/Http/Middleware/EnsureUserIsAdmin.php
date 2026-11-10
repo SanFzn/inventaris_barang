@@ -10,7 +10,10 @@ class EnsureUserIsAdmin
     public function handle(Request $request, Closure $next)
     {
         if (!$request->user() || $request->user()->role !== 'admin') {
-            return response()->json(['message' => 'Akses hanya untuk admin.'], 403);
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Akses hanya untuk admin.'], 403);
+            }
+            abort(403, 'Akses hanya untuk admin.');
         }
 
         return $next($request);

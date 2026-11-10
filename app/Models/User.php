@@ -29,11 +29,20 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'foto_profil',
     ];
 
     public function getNameAttribute()
     {
         return $this->username;
+    }
+
+    /**
+     * Return the URL for the profile photo, or null if not set.
+     */
+    public function profilPhotoUrl(): ?string
+    {
+        return $this->foto_profil ? asset('uploads/' . $this->foto_profil) : null;
     }
 
     /**

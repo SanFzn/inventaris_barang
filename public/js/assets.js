@@ -1,4 +1,32 @@
+/**
+ * Asset Management Page Script (/aset)
+ */
 document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll('.harga-input').forEach((input) => {
+        const rawInput = input.parentElement?.querySelector('.harga-raw-input');
+
+        const formatRupiah = (value) => {
+            const digits = value.replace(/\D/g, '');
+            if (!digits) {
+                if (rawInput) rawInput.value = '';
+                return '';
+            }
+
+            const formatted = new Intl.NumberFormat('id-ID').format(Number(digits));
+            if (rawInput) rawInput.value = digits;
+            return `${formatted}`;
+        };
+
+        const initialValue = rawInput ? rawInput.value : input.value;
+        if (initialValue) {
+            input.value = formatRupiah(String(initialValue));
+        }
+
+        input.addEventListener('input', () => {
+            input.value = formatRupiah(input.value);
+        });
+    });
+
     const assetNameInput = document.getElementById("nama_barang");
     const assetCodeInput = document.getElementById("kode_barang");
 
@@ -26,13 +54,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const deleteModal = new bootstrap.Modal(deleteModalElement);
-    let pendingDeleteForm;
+    let pendingDeleteForm = null;
 
     document.querySelectorAll(".delete-asset-form").forEach((form) => {
         form.addEventListener("submit", (event) => {
             event.preventDefault();
             pendingDeleteForm = form;
-            deleteAssetName.textContent = form.dataset.assetName;
+            deleteAssetName.textContent = form.dataset.assetName || "";
             deleteModal.show();
         });
     });
@@ -42,4 +70,38 @@ document.addEventListener("DOMContentLoaded", () => {
             pendingDeleteForm.submit();
         }
     });
+
+    // Word Counter & Validation for Spesifikasi / Deskripsi
+    function countWords(text) {
+        const trimmed = (text || "").trim();
+        if (!trimmed) return 0;
+        const matches = trimmed.match(/\S+/g);
+        return matches ? matches.length : 0;
+    }
+
+    function initWordCounter(textarea) {
+        const wrapper = textarea.closest("div") || textarea.parentElement;
+        const counter = wrapper ? wrapper.querySelector(".word-counter") : null;
+        const minWords = 10;
+
+        function update() {
+            const words = countWords(textarea.value);
+            if (!counter) return;
+
+            if (words < minWords) {
+                counter.textContent = `${words} / ${minWords} kata (kurang ${minWords - words} kata)`;
+                counter.className = "word-counter text-danger small fw-semibold";
+                textarea.setCustomValidity(`Deskripsi / spesifikasi wajib diisi minimal ${minWords} kata (saat ini ${words} kata).`);
+            } else {
+                counter.textContent = `${words} / ${minWords} kata ✓`;
+                counter.className = "word-counter text-success small fw-semibold";
+                textarea.setCustomValidity("");
+            }
+        }
+
+        textarea.addEventListener("input", update);
+        update();
+    }
+
+    document.querySelectorAll(".asset-desc-input, textarea[name='spesifikasi']").forEach(initWordCounter);
 });

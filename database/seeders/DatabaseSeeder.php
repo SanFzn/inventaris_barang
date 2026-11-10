@@ -25,18 +25,19 @@ class DatabaseSeeder extends Seeder
             Lokasi::firstOrCreate(['nama_lokasi' => $namaLokasi]);
         }
 
-        foreach (['Laptop', 'Meja', 'Kursi', 'Printer', 'Monitor', 'Komputer', 'Tablet'] as $namaBarang) {
+        foreach (['Laptop', 'Meja', 'Kursi', 'Printer', 'Monitor', 'Komputer', 'Tablet', 'Kabel Terminal', 'Pulpen'] as $namaBarang) {
             $kategori = Kategori::inRandomOrder()->first();
             $lokasi = Lokasi::inRandomOrder()->first();
 
             \App\Models\Barang::firstOrCreate(
                 ['nama_barang' => $namaBarang],
                 [
-                    'kode_barang' => 'BRG-' . strtoupper(substr($namaBarang, 0, 4)) . '-' . rand(100, 999),
+                    'kode_barang' => 'BRG-' . strtoupper(substr($namaBarang, 0, 3)) . '-' . rand(100, 999),
                     'id_kategori' => $kategori->id_kategori,
                     'id_lokasi' => $lokasi->id_lokasi,
                     'spesifikasi' => 'Spesifikasi untuk ' . $namaBarang,
                     'tgl_pembelian' => now(),
+                    'harga' => rand(100000, 1000000),
                     'status' => 'tersedia',
                     'file_qr' => null,
                 ]
@@ -49,6 +50,25 @@ class DatabaseSeeder extends Seeder
                 'username' => 'admin',
                 'password' => Hash::make('admin123'),
                 'role' => 'admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'user1@inventaris.local'],
+            [
+                'username' => 'user1',
+                'password' => Hash::make('user123'),
+                'role' => 'user',
+            ]
+        );
+
+
+        User::updateOrCreate(
+            ['email' => 'user2@inventaris.local'],
+            [
+                'username' => 'user2',
+                'password' => Hash::make('user223'),
+                'role' => 'user',
             ]
         );
     }
