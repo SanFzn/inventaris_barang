@@ -228,7 +228,7 @@
                     @endif
 
                     <section class="row g-4" id="laporan">
-                        <div class="col-lg-8">
+                        <div class="{{ Auth::user()->role === 'admin' ? 'col-lg-8' : 'col-12' }}">
                             <div class="card content-card h-100">
                                 <div class="card-body p-4">
                                     <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
@@ -249,54 +249,133 @@
                                             <a class="btn btn-sm btn-outline-primary text-nowrap" href="{{ route('assets.index') }}">Lihat semua</a>
                                         </div>
                                     </div>
-                                    @forelse($barangTerbaru as $barang)
-                                        <div class="d-flex justify-content-between align-items-center border-bottom py-3">
-                                            <div>
-                                                <div class="fw-semibold">{{ $barang->nama_barang }}</div>
-                                                <small class="text-muted">{{ $barang->kode_barang }} · {{ $barang->lokasi->nama_lokasi }}</small>
+
+                                    <div class="row g-3 g-lg-4">
+                                        @forelse($barangTerbaru as $barang)
+                                            <div class="{{ Auth::user()->role === 'admin' ? 'col-12 col-sm-6' : 'col-12 col-sm-6 col-lg-4' }}">
+                                                <div class="card h-100 asset-card border-0 shadow-sm overflow-hidden" style="background: #ffffff; border: 1px solid #edf2f7 !important;">
+                                                    {{-- Foto Aset & Status Overlay --}}
+                                                    <div class="asset-card-img-wrapper position-relative" style="height: 160px;">
+                                                        <img src="{{ $barang->image_url }}" alt="{{ $barang->nama_barang }}" class="asset-card-img" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80'">
+                                                        
+                                                        <div class="position-absolute top-0 start-0 w-100 p-2.5 d-flex justify-content-between align-items-center">
+                                                            <span class="badge bg-dark bg-opacity-75 text-white font-monospace backdrop-blur px-2 py-1 shadow-sm">
+                                                                <i class="bi bi-upc me-1"></i>{{ $barang->kode_barang }}
+                                                            </span>
+                                                            @if ($barang->status === 'tersedia')
+                                                                <span class="badge bg-success shadow-sm px-2 py-1">
+                                                                    <i class="bi bi-check-circle-fill me-1"></i>Tersedia
+                                                                </span>
+                                                            @elseif ($barang->status === 'dipinjam')
+                                                                <span class="badge bg-warning text-dark shadow-sm px-2 py-1">
+                                                                    <i class="bi bi-clock-fill me-1"></i>Dipinjam
+                                                                </span>
+                                                            @else
+                                                                <span class="badge bg-secondary shadow-sm px-2 py-1">
+                                                                    {{ ucfirst($barang->status) }}
+                                                                </span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- Body Info --}}
+                                                    <div class="card-body p-3 d-flex flex-column">
+                                                        <h3 class="h6 fw-bold text-dark mb-1 text-truncate" title="{{ $barang->nama_barang }}">
+                                                            {{ $barang->nama_barang }}
+                                                        </h3>
+                                                        
+                                                        <div class="d-flex align-items-center gap-2 text-muted small mb-2 flex-wrap" style="font-size: 0.8rem;">
+                                                            <span class="d-inline-flex align-items-center gap-1 text-truncate">
+                                                                <i class="bi bi-tag text-primary"></i> {{ $barang->kategori->nama_kategori ?? 'Umum' }}
+                                                            </span>
+                                                            <span>•</span>
+                                                            <span class="d-inline-flex align-items-center gap-1 text-truncate">
+                                                                <i class="bi bi-geo-alt text-danger"></i> {{ $barang->lokasi->nama_lokasi ?? 'Kantor' }}
+                                                            </span>
+                                                        </div>
+
+                                                        @if ($barang->spesifikasi)
+                                                            <p class="text-muted small mb-3 text-truncate-2" style="font-size: 0.8rem; min-height: 2.4em;" title="{{ $barang->spesifikasi }}">
+                                                                {{ $barang->spesifikasi }}
+                                                            </p>
+                                                        @else
+                                                            <p class="text-muted small mb-3 fst-italic" style="font-size: 0.8rem; min-height: 2.4em;">
+                                                                Tidak ada spesifikasi khusus.
+                                                            </p>
+                                                        @endif
+
+                                                        {{-- Actions --}}
+                                                        <div class="d-flex align-items-center gap-2 mt-auto pt-2 border-top border-light">
+                                                            <button type="button" class="btn btn-sm btn-outline-secondary px-2.5 btn-detail-asset"
+                                                                data-barang-name="{{ $barang->nama_barang }}"
+                                                                data-barang-kode="{{ $barang->kode_barang }}"
+                                                                data-barang-kategori="{{ $barang->kategori->nama_kategori ?? '-' }}"
+                                                                data-barang-lokasi="{{ $barang->lokasi->nama_lokasi ?? '-' }}"
+                                                                data-barang-status="{{ $barang->status }}"
+                                                                data-barang-tgl="{{ $barang->tgl_pembelian ? $barang->tgl_pembelian->format('d M Y') : '-' }}"
+                                                                data-barang-harga="{{ $barang->harga ? 'Rp ' . number_format($barang->harga, 0, ',', '.') : '-' }}"
+                                                                data-barang-spec="{{ $barang->spesifikasi }}"
+                                                                data-barang-image="{{ $barang->image_url }}"
+                                                                data-barang-id="{{ $barang->id_barang }}"
+                                                                title="Lihat Detail">
+                                                                <i class="bi bi-eye me-1"></i>Detail
+                                                            </button>
+
+                                                            @if (Auth::user()->role === 'admin')
+                                                                <a href="{{ route('qr.labels', ['kode_barang' => $barang->kode_barang]) }}" class="btn btn-sm btn-outline-primary flex-grow-1 text-nowrap">
+                                                                    <i class="bi bi-printer me-1"></i>Label QR
+                                                                </a>
+                                                            @else
+                                                                @if ($barang->status === 'tersedia')
+                                                                    <button type="button" class="btn btn-sm btn-primary flex-grow-1 text-nowrap btn-borrow-asset"
+                                                                        data-barang-id="{{ $barang->id_barang }}">
+                                                                        <i class="bi bi-box-arrow-up-right me-1"></i>Pinjam
+                                                                    </button>
+                                                                @else
+                                                                    <button type="button" class="btn btn-sm btn-light text-muted flex-grow-1 text-nowrap" disabled>
+                                                                        <i class="bi bi-lock me-1"></i>{{ ucfirst($barang->status) }}
+                                                                    </button>
+                                                                @endif
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <span class="badge bg-light text-dark">{{ ucfirst($barang->status) }}</span>
-                                        </div>
-                                    @empty
-                                        <div class="text-center py-5 text-muted">
-                                            <i class="bi bi-inbox display-5 d-block mb-3"></i>
-                                            <p class="mb-0">Belum ada aset yang ditambahkan.</p>
-                                        </div>
-                                    @endforelse
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-lg-4">
-                            <div class="card content-card h-100">
-                                <div class="card-body p-4">
-                                    <h2 class="h5 fw-bold mb-1">Aksi Cepat</h2>
-                                    <p class="small text-muted mb-4">Akses cepat ke fitur utama</p>
-                                    <div class="quick-actions">
-                                        @if (Auth::user()->role === 'admin')
-                                            <a class="quick-action" href="#newAssetModal" data-bs-toggle="modal">
-                                                <i class="bi bi-plus-circle"></i>
-                                                <span class="small fw-semibold text-center">Tambah Aset</span>  
-                                            </a>
-                                        @endif
-                                        <a class="quick-action" href="#scanQrModal" data-bs-toggle="modal">
-                                            <i class="bi bi-qr-code-scan"></i>
-                                            <span class="small fw-semibold text-center">Pindai QR</span>
-                                        </a>
-                                        @if (Auth::user()->role === 'admin')
-                                            <a class="quick-action" href="{{ route('qr.labels') }}">
-                                                <i class="bi bi-printer"></i>
-                                                <span class="small fw-semibold text-center">Cetak Label QR</span>
-                                            </a>
-                                        @else
-                                            <a class="quick-action" href="#borrowAssetModal" data-bs-toggle="modal">
-                                                <i class="bi bi-box-arrow-up-right"></i>
-                                                <span class="small fw-semibold text-center">Pinjam Barang</span>
-                                            </a>
-                                        @endif
+                                        @empty
+                                            <div class="col-12 text-center py-5 text-muted">
+                                                <i class="bi bi-inbox display-5 d-block mb-3"></i>
+                                                <p class="mb-0">Belum ada aset yang ditambahkan.</p>
+                                            </div>
+                                        @endforelse
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+                        @if (Auth::user()->role === 'admin')
+                            <div class="col-lg-4">
+                                <div class="card content-card h-100">
+                                    <div class="card-body p-4">
+                                        <h2 class="h5 fw-bold mb-1">Aksi Cepat</h2>
+                                        <p class="small text-muted mb-4">Akses cepat ke fitur utama</p>
+                                        <div class="quick-actions">
+                                            <a class="quick-action" href="#newAssetModal" data-bs-toggle="modal">
+                                                <i class="bi bi-plus-circle"></i>
+                                                <span class="small fw-semibold text-center">Tambah Aset</span>  
+                                            </a>
+                                            <a class="quick-action" href="#scanQrModal" data-bs-toggle="modal">
+                                                <i class="bi bi-qr-code-scan"></i>
+                                                <span class="small fw-semibold text-center">Pindai QR</span>
+                                            </a>
+                                            <a class="quick-action" href="{{ route('qr.labels') }}">
+                                                <i class="bi bi-printer"></i>
+                                                <span class="small fw-semibold text-center">Cetak Label QR</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     </section>
                 </div>
             </main>
@@ -337,6 +416,63 @@
                         <button type="submit" class="btn btn-primary" @disabled($barangUntukDipinjam->isEmpty())><i class="bi bi-send me-1"></i>Kirim Pengajuan</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    {{-- Modal Detail Barang --}}
+    <div class="modal fade" id="detailAssetModal" tabindex="-1" aria-labelledby="detailAssetModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header">
+                    <h2 class="modal-title h5 fw-bold" id="detailAssetModalLabel"><i class="bi bi-info-circle me-2 text-primary"></i>Detail Barang</h2>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-5 text-center">
+                            <img id="detailAssetImage" src="" alt="Foto Barang" class="img-fluid rounded-3 border shadow-sm bg-light" style="max-height: 240px; width: 100%; object-fit: cover;">
+                        </div>
+                        <div class="col-md-7">
+                            <div class="mb-2">
+                                <span id="detailAssetStatus" class="badge bg-success px-2 py-1"></span>
+                            </div>
+                            <h3 id="detailAssetName" class="h4 fw-bold mb-1"></h3>
+                            <p id="detailAssetCode" class="text-muted mb-3 font-monospace small"></p>
+
+                            <div class="small text-muted">
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-tag text-primary"></i>
+                                    <span id="detailAssetCategory"></span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-geo-alt text-danger"></i>
+                                    <span id="detailAssetLocation"></span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-calendar3 text-success"></i>
+                                    <span id="detailAssetTanggal"></span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2 mb-2">
+                                    <i class="bi bi-currency-dollar text-warning"></i>
+                                    <span id="detailAssetPrice"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 pt-2 border-top">
+                            <label class="form-label fw-semibold">Spesifikasi</label>
+                            <p id="detailAssetSpec" class="mb-0 text-secondary"></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">Tutup</button>
+                    @if (Auth::user()->role !== 'admin')
+                        <button type="button" class="btn btn-primary d-none" id="detailModalBorrowBtn">
+                            <i class="bi bi-box-arrow-up-right me-1"></i>Pinjam Barang Ini
+                        </button>
+                    @endif
+                </div>
             </div>
         </div>
     </div>
@@ -473,6 +609,81 @@
             if (returnFormId) {
                 document.getElementById(returnFormId).submit();
             }
+        });
+
+        // Detail asset handler
+        let currentDetailBarangId = null;
+        const detailModalEl = document.getElementById('detailAssetModal');
+        let detailModalInstance = null;
+        if (detailModalEl) {
+            detailModalInstance = new bootstrap.Modal(detailModalEl);
+        }
+
+        document.querySelectorAll('.btn-detail-asset').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const status = this.getAttribute('data-barang-status');
+                const statusBadge = document.getElementById('detailAssetStatus');
+                currentDetailBarangId = this.getAttribute('data-barang-id');
+
+                if (statusBadge) {
+                    statusBadge.textContent = status === 'tersedia' ? 'Tersedia' : status === 'dipinjam' ? 'Dipinjam' : (status ? status.charAt(0).toUpperCase() + status.slice(1) : 'Tidak Tersedia');
+                    statusBadge.className = status === 'tersedia'
+                        ? 'badge bg-success px-2 py-1'
+                        : status === 'dipinjam'
+                            ? 'badge bg-warning text-dark px-2 py-1'
+                            : 'badge bg-secondary px-2 py-1';
+                }
+                document.getElementById('detailAssetName').textContent = this.getAttribute('data-barang-name');
+                document.getElementById('detailAssetCode').textContent = this.getAttribute('data-barang-kode');
+                document.getElementById('detailAssetCategory').textContent = this.getAttribute('data-barang-kategori');
+                document.getElementById('detailAssetLocation').textContent = this.getAttribute('data-barang-lokasi');
+                document.getElementById('detailAssetTanggal').textContent = this.getAttribute('data-barang-tgl');
+                document.getElementById('detailAssetPrice').textContent = this.getAttribute('data-barang-harga');
+                document.getElementById('detailAssetSpec').textContent = this.getAttribute('data-barang-spec') || 'Tidak ada spesifikasi khusus.';
+                document.getElementById('detailAssetImage').src = this.getAttribute('data-barang-image');
+
+                const borrowBtn = document.getElementById('detailModalBorrowBtn');
+                if (borrowBtn) {
+                    if (status === 'tersedia') {
+                        borrowBtn.classList.remove('d-none');
+                    } else {
+                        borrowBtn.classList.add('d-none');
+                    }
+                }
+
+                if (detailModalInstance) {
+                    detailModalInstance.show();
+                }
+            });
+        });
+
+        // Detail modal borrow button
+        const detailModalBorrowBtn = document.getElementById('detailModalBorrowBtn');
+        if (detailModalBorrowBtn) {
+            detailModalBorrowBtn.addEventListener('click', function() {
+                if (detailModalInstance) {
+                    detailModalInstance.hide();
+                }
+                const select = document.getElementById('borrowAsset');
+                if (select && currentDetailBarangId) {
+                    select.value = currentDetailBarangId;
+                }
+                const borrowModal = new bootstrap.Modal(document.getElementById('borrowAssetModal'));
+                borrowModal.show();
+            });
+        }
+
+        // Quick borrow asset handler
+        document.querySelectorAll('.btn-borrow-asset').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                const id = this.getAttribute('data-barang-id');
+                const select = document.getElementById('borrowAsset');
+                if (select) {
+                    select.value = id;
+                }
+                const borrowModal = new bootstrap.Modal(document.getElementById('borrowAssetModal'));
+                borrowModal.show();
+            });
         });
     </script>
 </body>
